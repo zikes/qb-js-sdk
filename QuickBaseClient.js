@@ -230,7 +230,7 @@
     function wrap(tag,str){return "<"+tag+">"+str+"</"+tag+">";}
 
     if(opts.ticket){xml.push(wrap("ticket",opts.ticket))}
-    if(opts.apptoken){xml.push(wrap("apptoken",opts.apptoken))}
+    if(opts.apptoken && opts.dbid !== "main"){xml.push(wrap("apptoken",opts.apptoken))}
     for(var prop in data) if(data.hasOwnProperty(prop)){
       if(typeof data[prop] === "string" || typeof data[prop] === "number"){
         xml.push(wrap(prop,data[prop]));
@@ -276,6 +276,8 @@
     data.act = opts.action;
     if(opts.apptoken) data.apptoken = opts.apptoken;
     if(opts.ticket) data.ticket = opts.ticket;
+
+    if(opts.dbid === "main") delete data.apptoken;
 
     promise = $.ajax({
       "type": "GET",
