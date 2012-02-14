@@ -555,6 +555,31 @@
 
   QuickBaseClient.prototype.users_roles = function(opts){
     // API_UserRoles
+    return this.get($.extend(
+      this.defaults(),
+      {
+        "action": "API_UserRoles",
+        "processData": function($data){
+          var output=[];
+          $data.find('users user').each(function(){
+            var user = {roles:[]};
+            user.id = $(this).attr('id');
+            user.name = $(this).find('name').text();
+            $(this).find('role').each(function(){
+              var role = {};
+              role.id = $(this).attr('id');
+              role.name = $(this).children('name').text();
+              role.access = $(this).children('access').text();
+              role.access_id = $(this).children('access').attr('id');
+              user.roles.push(role);
+            });
+            output.push(user);
+          })
+          return output;
+        }
+      },
+      opts
+    ));
   };
 
   /****************************************************************************\

@@ -125,7 +125,6 @@ describe('QuickBaseClient', function(){
         this.timeout(0);
         auth_promise.done(function(){
           ticket = qbc.ticket();
-          console.log(ticket);
           signout_promise = qbc.signout();
           signout_promise.done(function(){
             done();
@@ -224,7 +223,9 @@ describe('QuickBaseClient', function(){
       it('should return appropriate results');
     });
     describe('#users_roles()',function(){
-      it('should complete successfully');
+      it('should complete successfully',function(done){
+        qbc.users_roles({dbid:app_dbid}).done(function(){done()});
+      });
       it('should return appropriate results');
     });
   });
