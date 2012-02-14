@@ -235,7 +235,15 @@ describe('QuickBaseClient', function(){
       qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
     });
     describe('#create_database()',function(){
-      it('should complete successfully');
+      it('should complete successfully',function(done){
+        qbc.create_database({
+          'name': 'Test Application',
+          'desc': 'My Test Application'
+        }).done(function(data){
+          console.log(data);
+          done();
+        });
+      });
       it('should return appropriate results');
     });
     describe('#delete_database()',function(){

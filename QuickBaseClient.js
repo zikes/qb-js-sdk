@@ -588,6 +588,26 @@
 
   QuickBaseClient.prototype.create_database = function(opts){
     // API_CreateDatabase
+    return this.post($.extend(
+      this.defaults(),
+      {
+        "dbid": "main",
+        "action": "API_CreateDatabase",
+        "processData": function($data){
+          return {
+            "dbid": $data.find('dbid').text(),
+            "appdbid": $data.find('appdbid').text(),
+            "apptoken": $data.find('apptoken').text()
+          };
+        },
+        "data":{
+          "dbname": opts.name || "New Application",
+          "dbdesc": opts.desc || "My New QuickBase Application",
+          "createapptoken": "1"
+        }
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.delete_database = function(opts){
