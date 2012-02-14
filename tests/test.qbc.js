@@ -230,13 +230,13 @@ describe('QuickBaseClient', function(){
     });
   });
   describe('Application Operations',function(){
-    var qbc;
+    var qbc, new_app_promise;
     beforeEach(function(){
       qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
     });
     describe('#create_database()',function(){
       it('should complete successfully',function(done){
-        qbc.create_database({
+        new_app_promise = qbc.create_database({
           'name': 'Test Application',
           'desc': 'My Test Application'
         }).done(function(data){
@@ -247,7 +247,13 @@ describe('QuickBaseClient', function(){
       it('should return appropriate results');
     });
     describe('#delete_database()',function(){
-      it('should complete successfully');
+      it('should complete successfully',function(done){
+        new_app_promise.done(function(data){
+          qbc.delete_database({dbid:data.appdbid,apptoken:data.apptoken}).done(function(){
+            done();
+          });
+        });
+      });
       it('should return appropriate results');
     });
     describe('#clone_database()',function(){

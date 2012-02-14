@@ -612,6 +612,11 @@
 
   QuickBaseClient.prototype.delete_database = function(opts){
     // API_DeleteDatabase
+    return this.post($.extend(
+      this.defaults(),
+      {"action": "API_DeleteDatabase"},
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.clone_database = function(opts){
