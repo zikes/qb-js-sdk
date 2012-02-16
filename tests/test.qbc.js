@@ -221,6 +221,11 @@ describe('QuickBaseClient', function(){
         qbc.schema({dbid:app_dbid}).done(function(){done()});
       });
       it('should return appropriate results');
+      it('should fail on nonexistent DBIDs',function(done){
+        qbc.schema({dbid:'abc123'}).fail(function(data){
+          done();
+        })
+      });
     });
     describe('#users_roles()',function(){
       it('should complete successfully',function(done){
