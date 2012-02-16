@@ -775,7 +775,7 @@
       {
         "action": "API_GetDBVar",
         "data": {
-          "varname": opts.var
+          "varname": opts.name
         },
         "processData": function($data){
           return $data.find("value").text();
@@ -787,6 +787,17 @@
 
   QuickBaseClient.prototype.set_var = function(opts){
     // API_SetDBVar
+    return this.post($.extend(
+      this.defaults(),
+      {
+        "action": "API_SetDBVar",
+        "data": {
+          "varname": opts.name,
+          "value": opts.value
+        }
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.write_page = function(opts){

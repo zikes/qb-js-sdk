@@ -320,8 +320,24 @@ describe('QuickBaseClient', function(){
       });
     });
     describe('#set_var()',function(){
-      it('should complete successfully');
-      it('should return appropriate results');
+      it('should complete successfully',function(done){
+        qbc.set_var({
+          dbid:app_dbid,
+          name:'Test_Set',
+          value:'set'
+          }).done(function(){
+            qbc.get_var({
+              dbid:app_dbid,
+              name:'Test_Set'
+            }).done(function(data){
+              if(data === 'set'){
+                done();
+              }else{
+                done(new Error())
+              }
+            });
+          });
+      });
     });
     describe('#write_page()',function(){
       it('should complete successfully');
