@@ -19,6 +19,7 @@
 */
 
 ;(function($, global, undefined){
+  /*jshint bitwise:false */
   "use strict";
 
   var defaults = {
