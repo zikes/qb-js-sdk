@@ -74,7 +74,7 @@
      * @param {Array} args List of arguments to pass to the listener
      * @return {Boolean} If false then it was a once event
      */
-    Event.prototype.fire = function(args) {
+    Event.prototype.fire = function(args){
       this.listener.apply(this.scope || this.instance, args);
 
       // Remove the listener if this is a once only listener
@@ -91,7 +91,7 @@
      * @param {Function} callback Function to pass each listener to
      * @return {Object} The current EventEmitter instance to allow chaining
      */
-    EventEmitter.prototype.eachListener = function(type, callback) {
+    EventEmitter.prototype.eachListener = function(type, callback){
       // Initialise variables
       var i = null,
         possibleListeners = null,
@@ -126,7 +126,7 @@
      * @param {Boolean} once If true then the listener will be removed after the first call
      * @return {Object} The current EventEmitter instance to allow chaining
      */
-    EventEmitter.prototype.addListener = function(type, listener, scope, once) {
+    EventEmitter.prototype.addListener = function(type, listener, scope, once){
       // Create the listener array if it does not exist yet
       if(!this._events.hasOwnProperty(type)) {
         this._events[type] = [];
@@ -174,7 +174,7 @@
      * @param {Object} scope Object that this should be set to when the listener is called
      * @return {Object} The current EventEmitter instance to allow chaining
      */
-    EventEmitter.prototype.once = function(type, listener, scope) {
+    EventEmitter.prototype.once = function(type, listener, scope){
       return this.addListener(type, listener, scope, true);
     };
 
@@ -186,8 +186,8 @@
      * @param {Object} scope The scope the event must have to be removed
      * @return {Object} The current EventEmitter instance to allow chaining
      */
-    EventEmitter.prototype.removeListener = function(type, listener, scope) {
-      this.eachListener(type, function(currentListener, index) {
+    EventEmitter.prototype.removeListener = function(type, listener, scope){
+      this.eachListener(type, function(currentListener, index){
         // If this is the listener remove it from the array
         // We also compare the scope if it was passed
         if(currentListener.listener === listener && (!scope || currentListener.scope === scope)) {
@@ -221,7 +221,7 @@
      * @param {String} type Event type name to remove all listeners from
      * @return {Object} The current EventEmitter instance to allow chaining
      */
-    EventEmitter.prototype.removeAllListeners = function(type) {
+    EventEmitter.prototype.removeAllListeners = function(type){
       // Check for a type, if there is none remove all listeners
       // If there is a type however, just remove the listeners for that type
       if(type && this._events.hasOwnProperty(type)) {
@@ -241,13 +241,13 @@
      * @param {String} type Event type name to return all listeners from
      * @return {Array} Will return either an array of listeners or an empty array if there are none
      */
-    EventEmitter.prototype.listeners = function(type) {
+    EventEmitter.prototype.listeners = function(type){
       // Return the array of listeners or an empty array if it does not exist
       if(this._events.hasOwnProperty(type)) {
         // It does exist, loop over building the array
         var listeners = [];
 
-        this.eachListener(type, function(evt) {
+        this.eachListener(type, function(evt){
           listeners.push(evt.listener);
         });
 
@@ -264,7 +264,7 @@
      * @param {String} type Event type name to run all listeners from
      * @return {Object} The current EventEmitter instance to allow chaining
      */
-    EventEmitter.prototype.emit = function(type) {
+    EventEmitter.prototype.emit = function(type){
       // Calculate the arguments
       var args = [],
         i = null;
@@ -273,7 +273,7 @@
         args.push(arguments[i]);
       }
 
-      this.eachListener(type, function(currentListener) {
+      this.eachListener(type, function(currentListener){
         return currentListener.fire(args);
       });
 
@@ -289,7 +289,7 @@
      * @param {Number} maxListeners The new max listener limit
      * @return {Object} The current EventEmitter instance to allow chaining
      */
-    EventEmitter.prototype.setMaxListeners = function(maxListeners) {
+    EventEmitter.prototype.setMaxListeners = function(maxListeners){
       this._maxListeners = maxListeners;
 
       // Return the instance to allow chaining
@@ -305,7 +305,7 @@
 
     this._dbid = opts.dbid;
     this._apptoken = opts.apptoken;
-    this._realm = opts.realm.match(/^http/) ? opts.realm : "https://"+opts.realm+".quickbase.com";
+    this._realm = opts.realm.match(/^http/) ? opts.realm : "https://" + opts.realm + ".quickbase.com";
     this._ticket = opts.ticket;
   }
 
@@ -315,7 +315,7 @@
   QuickBaseClient.version = "3.0.0";
 
   QuickBaseClient.GenericErrorHandler = function(err){
-    throw new Error("QuickBase Error "+err.code+": "+err.message);
+    throw new Error("QuickBase Error " + err.code + ": " + err.message);
   };
 
   /****************************************************************************\
@@ -328,7 +328,7 @@
         xml = ["<qdbapi>"],
         promise, deferred = $.Deferred();
 
-    function wrap(tag,str){return "<"+tag+">"+str+"</"+tag+">";}
+    function wrap(tag,str){return "<" + tag + ">" + str + "</" + tag + ">";}
 
     if(opts.ticket){xml.push(wrap("ticket",opts.ticket));}
     if(opts.apptoken && opts.dbid !== "main"){xml.push(wrap("apptoken",opts.apptoken));}
@@ -337,13 +337,13 @@
         if(typeof data[prop] === "string" || typeof data[prop] === "number"){
           xml.push(wrap(prop,data[prop]));
         }else{
-          throw new Error("Unknown data type for ["+prop+"]: "+(typeof data[prop]));
+          throw new Error("Unknown data type for [" + prop + "]: " + (typeof data[prop]));
         }
       }
     }
     for(var field in fields){
       if(fields.hasOwnProperty(field)){
-        xml.push("<field "+(field.match(/^\d+$/) ? "fid" : "name")+"=\""+field+"\">"+fields[field]+"</field>");
+        xml.push("<field " + (field.match(/^\d+$/) ? "fid" : "name") + "=\"" + field + "\">" + fields[field] + "</field>");
       }
     }
 
@@ -351,10 +351,10 @@
 
     promise = $.ajax({
       "type": "POST",
-      "url": opts.realm+"/db/"+opts.dbid,
+      "url": opts.realm + "/db/" + opts.dbid,
       "dataType": "xml",
       "contentType": "application/xml",
-      "headers": {"QUICKBASE-ACTION":opts.action},
+      "headers": {"QUICKBASE-ACTION": opts.action},
       "data": xml.join("")
     });
     promise.done(function(data){
@@ -386,7 +386,7 @@
 
     promise = $.ajax({
       "type": "GET",
-      "url": opts.realm+"/db/"+opts.dbid,
+      "url": opts.realm + "/db/" + opts.dbid,
       "data": data
     });
 
@@ -501,7 +501,7 @@
       if(!!~realm.indexOf("://")){
         this._realm = realm;
       }else{
-        this._realm = "https://"+realm+".quickbase.com";
+        this._realm = "https://" + realm + ".quickbase.com";
       }
       return this;
     }
@@ -527,7 +527,7 @@
       },
       "dbid": "main",
       "action": "API_Authenticate",
-      "data":{
+      "data": {
         "username": opts.username,
         "password": opts.password,
         "hours": opts.hours || 8
@@ -539,7 +539,7 @@
     var self = this;
     return this.get($.extend(
       this.defaults(),
-      {dbid:"main",action:"API_SignOut",processData:function(){self.ticket("");}},
+      {"dbid": "main","action": "API_SignOut","processData": function(){self.ticket("");}},
       opts
     ));
   };
@@ -556,8 +556,8 @@
         "action": "API_GetDBInfo",
         "processData": function($data){
           var output = {}, i, len,
-              tags=["dbname","lastRecModTime","lastModifiedTime","createdTime","numRecords","mgrID","mgrName","version","time_zone"];
-          for(i=0,len=tags.length;i<len;i++){
+              tags = ["dbname","lastRecModTime","lastModifiedTime","createdTime","numRecords","mgrID","mgrName","version","time_zone"];
+          for(i = 0, len = tags.length; i < len; i++){
             if($data.find(tags[i]).length){
               output[tags[i]] = $data.find(tags[i]).text();
               if(output[tags[i]].match(/^\d+$/)){
@@ -584,7 +584,7 @@
         "processData": function($data){
           return $data.find("dbid").text();
         },
-        "data":{
+        "data": {
           "dbname": opts.dbname,
           "parentsOnly": 1
         }
@@ -617,13 +617,13 @@
       this.defaults(),
       {
         "action": "API_GetAppDTMInfo",
-        "data":{"dbid":opts.dbid},
+        "data": {"dbid": opts.dbid},
         "processData": function($data){
           var output = {
             "req_time": new Date(parseInt($data.find("RequestTime").text(),10)),
             "next_req_time": new Date(parseInt($data.find("RequestNextAllowedTime").text(),10)),
-            app: {},
-            tables: []
+            "app": {},
+            "tables": []
           };
           var $app = $data.find("app");
           output.app.dbid = $app.prop("id");
@@ -667,9 +667,9 @@
       {
         "action": "API_UserRoles",
         "processData": function($data){
-          var output=[];
+          var output = [];
           $data.find("users user").each(function(){
-            var user = {roles:[]};
+            var user = {"roles": []};
             user.id = $(this).attr("id");
             user.name = $(this).find("name").text();
             $(this).find("role").each(function(){
@@ -707,7 +707,7 @@
             "apptoken": $data.find("apptoken").text()
           };
         },
-        "data":{
+        "data": {
           "dbname": opts.name || "New Application",
           "dbdesc": opts.desc || "My New QuickBase Application",
           "createapptoken": "1"
@@ -729,9 +729,9 @@
   QuickBaseClient.prototype.clone_database = function(opts){
     // API_CloneDatabase
 
-    var keep_data = (typeof opts.keep_data==="boolean"?(opts.keep_data?"1":"0"):"1"),
-        exclude_files = (typeof opts.keep_files==="boolean"?(opts.keep_files?"0":"1"):"0"),
-        keep_users = (typeof opts.keep_users==="boolean"?(opts.keep_users?"1":"0"):"1");
+    var keep_data = (typeof opts.keep_data === "boolean" ? (opts.keep_data ? "1" : "0") : "1"),
+        exclude_files = (typeof opts.keep_files === "boolean" ? (opts.keep_files ? "0" : "1") : "0"),
+        keep_users = (typeof opts.keep_users === "boolean" ? (opts.keep_users ? "1" : "0") : "1");
 
     return this.post($.extend(
       this.defaults(),
@@ -742,7 +742,7 @@
             "dbid": $data.find("newdbid").text()
           };
         },
-        "data":{
+        "data": {
           "newdbname": opts.name || "Clone of Database",
           "newdbdesc": opts.desc || "Clone of Database",
           "keepData": keep_data,
@@ -825,7 +825,7 @@
       {
         "action": "API_AddField",
         "processData": function($data){return $data.find("fid").text();},
-        "data":{
+        "data": {
           "label": opts.label || "New Field",
           "type": opts.type || "text",
         }
@@ -838,8 +838,8 @@
     return this.post($.extend(
       this.defaults(),
       {
-        "data":{"fid":opts.fid},
-        "action":"API_DeleteField"
+        "data": {"fid": opts.fid},
+        "action": "API_DeleteField"
       },
       opts
     ));
@@ -868,7 +868,7 @@
       "processData": function($data){
         var rid = parseInt($data.find("rid").text(),10);
         var updateId = parseInt($data.find("update_id").text(),10);
-        return {rid:rid,updateId:updateId};
+        return {"rid": rid,"updateId": updateId};
       }
     },opts));
   };
