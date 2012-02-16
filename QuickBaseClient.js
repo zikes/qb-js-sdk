@@ -36,7 +36,7 @@
      * @api public.
      */
 
-    function EventEmitter(){};
+    function EventEmitter(){}
 
     /**
      * Adds a listener.
@@ -74,7 +74,7 @@
       function on () {
         self.removeListener(name, on);
         fn.apply(this, arguments);
-      };
+      }
 
       on.listener = fn;
       this.on(name, on);
@@ -179,7 +179,7 @@
 
       var args = [].slice.call(arguments, 1);
 
-      if ('function' == typeof handler) {
+      if ('function' === typeof handler) {
         handler.apply(this, args);
       } else if (isArray(handler)) {
         var listeners = handler.slice();
@@ -229,17 +229,21 @@
 
     function wrap(tag,str){return "<"+tag+">"+str+"</"+tag+">";}
 
-    if(opts.ticket){xml.push(wrap("ticket",opts.ticket))}
-    if(opts.apptoken && opts.dbid !== "main"){xml.push(wrap("apptoken",opts.apptoken))}
-    for(var prop in data) if(data.hasOwnProperty(prop)){
-      if(typeof data[prop] === "string" || typeof data[prop] === "number"){
-        xml.push(wrap(prop,data[prop]));
-      }else{
-        throw new Error("Unknown data type for ["+prop+"]: "+(typeof data[prop]));
+    if(opts.ticket){xml.push(wrap("ticket",opts.ticket));}
+    if(opts.apptoken && opts.dbid !== "main"){xml.push(wrap("apptoken",opts.apptoken));}
+    for(var prop in data){
+      if(data.hasOwnProperty(prop)){
+        if(typeof data[prop] === "string" || typeof data[prop] === "number"){
+          xml.push(wrap(prop,data[prop]));
+        }else{
+          throw new Error("Unknown data type for ["+prop+"]: "+(typeof data[prop]));
+        }
       }
     }
-    for(var field in fields) if(fields.hasOwnProperty(field)){
-      xml.push("<field "+(field.match(/^\d+$/) ? "fid" : "name")+"=\""+field+"\">"+fields[field]+"</field>");
+    for(var field in fields){
+      if(fields.hasOwnProperty(field)){
+        xml.push("<field "+(field.match(/^\d+$/) ? "fid" : "name")+"=\""+field+"\">"+fields[field]+"</field>");
+      }
     }
 
     xml.push("</qdbapi>");
@@ -265,7 +269,7 @@
     });
     promise.fail(function(data){
       deferred.reject(data);
-    })
+    });
 
     return deferred.promise();
   };
@@ -274,10 +278,10 @@
     var data = opts.data,
         promise, deferred = $.Deferred();
     data.act = opts.action;
-    if(opts.apptoken) data.apptoken = opts.apptoken;
-    if(opts.ticket) data.ticket = opts.ticket;
+    if(opts.apptoken){data.apptoken = opts.apptoken;}
+    if(opts.ticket){data.ticket = opts.ticket;}
 
-    if(opts.dbid === "main") delete data.apptoken;
+    if(opts.dbid === "main"){delete data.apptoken;}
 
     promise = $.ajax({
       "type": "GET",
@@ -313,7 +317,7 @@
       "fields": {},
       "action": "",
       "realm": this.realm()
-    }
+    };
   };
 
   /****************************************************************************\
@@ -375,7 +379,7 @@
 
   QuickBaseClient.to_date = function(str){
     return new Date(parseInt(str,10));
-  }
+  };
 
   /****************************************************************************\
   |                               Configuration                                |
@@ -458,7 +462,7 @@
               if(output[tags[i]].match(/^\d+$/)){
                 output[tags[i]] = parseInt(output[tags[i]],10);
                 if(tags[i].match(/time/i)){
-                  output[tags[i]] = new Date(output[tags[i]])
+                  output[tags[i]] = new Date(output[tags[i]]);
                 }
               }
             }
@@ -498,7 +502,7 @@
           return {
             "ancestor": $data.find("ancestorappid").text(),
             "oldest": $data.find("oldestancestorappid").text()
-          }
+          };
         }
       },
       opts
@@ -548,7 +552,7 @@
       {
         "action": "API_GetSchema",
         "processData": function($data){
-          return QuickBaseClient.processTable($data.find('table'))
+          return QuickBaseClient.processTable($data.find('table'));
         }
       },
       opts
@@ -576,7 +580,7 @@
               user.roles.push(role);
             });
             output.push(user);
-          })
+          });
           return output;
         }
       },
@@ -707,7 +711,7 @@
         var updateId = parseInt($data.find("update_id").text(),10);
         return {rid:rid,updateId:updateId};
       }
-    },opts))
+    },opts));
   };
 
   QuickBaseClient.prototype.add_record_form = function(opts){
@@ -730,7 +734,7 @@
     return this.post($.extend(this.defaults(),{
       "action": "API_DeleteRecord",
       "data": {"rid": opts.rid}
-    },opts))
+    },opts));
   };
 
   QuickBaseClient.prototype.edit_record = function(opts){
