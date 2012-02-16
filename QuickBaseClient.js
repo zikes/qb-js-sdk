@@ -392,13 +392,17 @@
 
     promise.done(function(data){
       var $data = $(data);
-      if($data.find("errcode").text() !== "0"){
+      if($data.find("errcode").length > 0 && $data.find("errcode").text() !== "0"){
         deferred.reject({
           "code": $data.find("errcode").text(),
           "message": $data.find("errtext").text()
         });
       }else{
-        deferred.resolve(opts.processData($data));
+        if(opts.data_type === "raw"){
+          deferred.resolve(opts.processData(data));
+        }else{
+          deferred.resolve(opts.processData($data));
+        }
       }
     });
     promise.fail(function(data){
@@ -413,7 +417,7 @@
       "apptoken": this.apptoken(),
       "dbid": this.dbid(),
       "ticket": this.ticket(),
-      "processData": function(){},
+      "processData": function(a){return a;},
       "data": {},
       "fields": {},
       "action": "",
@@ -835,6 +839,17 @@
 
   QuickBaseClient.prototype.get_page = function(opts){
     // API_GetDBPage
+    return this.get($.extend(
+      this.defaults(),
+      {
+        "action": "dbpage",
+        "data_type": "raw",
+        "data": {
+          "pageID": opts.id
+        }
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.run_import = function(opts){
