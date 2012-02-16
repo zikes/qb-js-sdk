@@ -1,5 +1,5 @@
 describe('QuickBaseClient', function(){
-  var apptoken="dgmvaisb38k3ucb6zy9hibgepwyc",
+  var apptoken="b35ijpduxr7rrbwge2ced3zwvke",
       app_dbid="bgwzttrag",
       table_dbid="bgwzttrbv",
       username="Jason.Hutchinson@wal-mart.com",
@@ -257,8 +257,24 @@ describe('QuickBaseClient', function(){
       it('should return appropriate results');
     });
     describe('#clone_database()',function(){
-      it('should complete successfully');
-      it('should return appropriate results');
+      var promise;
+      it('should complete successfully',function(done){
+        promise = qbc.clone_database({
+          dbid:app_dbid,
+          name:'Clone of Test App',
+          desc:'Clone of Test App'
+        }).done(function(data){
+          done();
+        })
+      });
+      it('should return appropriate results',function(done){
+        promise.done(function(data){
+          if(data.dbid){
+            done();
+            qbc.delete_database({dbid:data.dbid});
+          }
+        })
+      });
     });
     describe('#rename_database()',function(){
       it('should complete successfully');

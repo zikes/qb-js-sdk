@@ -728,6 +728,30 @@
 
   QuickBaseClient.prototype.clone_database = function(opts){
     // API_CloneDatabase
+
+    var keep_data = (typeof opts.keep_data==='boolean'?(opts.keep_data?"1":"0"):"1"),
+        exclude_files = (typeof opts.keep_files==='boolean'?(opts.keep_files?"0":"1"):"0"),
+        keep_users = (typeof opts.keep_users==='boolean'?(opts.keep_users?"1":"0"):"1");
+
+    return this.post($.extend(
+      this.defaults(),
+      {
+        "action": "API_CloneDatabase",
+        "processData": function($data){
+          return {
+            "dbid": $data.find('newdbid').text()
+          };
+        },
+        "data":{
+          "newdbname": opts.name || "Clone of Database",
+          "newdbdesc": opts.desc || "Clone of Database",
+          "keepData": keep_data,
+          "excludeFiles": exclude_files,
+          "usersandroles": keep_users
+        }
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.rename_database = function(opts){
