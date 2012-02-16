@@ -240,7 +240,6 @@ describe('QuickBaseClient', function(){
           'name': 'Test Application',
           'desc': 'My Test Application'
         }).done(function(data){
-          console.log(data);
           done();
         });
       });
@@ -254,7 +253,6 @@ describe('QuickBaseClient', function(){
           });
         });
       });
-      it('should return appropriate results');
     });
     describe('#clone_database()',function(){
       var promise;
