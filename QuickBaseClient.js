@@ -29,175 +29,275 @@
       },
       evt_prefix = "jQB-";
 
+  /**
+   * EventEmitter v3.1.4
+   * https://github.com/Wolfy87/EventEmitter
+   *
+   * Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
+   * Oliver Caldwell (olivercaldwell.co.uk)
+   */
+
   var EventEmitter = (function(){
     /**
-     * Event emitter constructor.
-     *
-     * @api public.
+     * EventEmitter class
+     * Creates an object with event registering and firing methods
      */
-
-    function EventEmitter(){}
+    function EventEmitter() {
+      // Initialise required storage variables
+      this._events = {};
+      this._maxListeners = 10;
+    }
 
     /**
-     * Adds a listener.
+     * Event class
+     * Contains Event methods and property storage
      *
-     * @api public
+     * @param {String} type Event type name
+     * @param {Function} listener Function to be called when the event is fired
+     * @param {Object} scope Object that this should be set to when the listener is called
+     * @param {Boolean} once If true then the listener will be removed after the first call
+     * @param {Object} instance The parent EventEmitter instance
      */
-
-    EventEmitter.prototype.on = function (name, fn) {
-      if (!this.$events) {
-        this.$events = {};
-      }
-
-      if (!this.$events[name]) {
-        this.$events[name] = fn;
-      } else if (isArray(this.$events[name])) {
-        this.$events[name].push(fn);
-      } else {
-        this.$events[name] = [this.$events[name], fn];
-      }
-
-      return this;
-    };
-
-    EventEmitter.prototype.addListener = EventEmitter.prototype.on;
+    function Event(type, listener, scope, once, instance) {
+      // Store arguments
+      this.type = type;
+      this.listener = listener;
+      this.scope = scope;
+      this.once = once;
+      this.instance = instance;
+    }
 
     /**
-     * Adds a volatile listener.
+     * Executes the listener
      *
-     * @api public
+     * @param {Array} args List of arguments to pass to the listener
+     * @return {Boolean} If false then it was a once event
      */
+    Event.prototype.fire = function(args) {
+      this.listener.apply(this.scope || this.instance, args);
 
-    EventEmitter.prototype.once = function (name, fn) {
-      var self = this;
-
-      function on () {
-        self.removeListener(name, on);
-        fn.apply(this, arguments);
+      // Remove the listener if this is a once only listener
+      if(this.once) {
+        this.instance.removeListener(this.type, this.listener, this.scope);
+        return false;
       }
-
-      on.listener = fn;
-      this.on(name, on);
-
-      return this;
     };
 
     /**
-     * Removes a listener.
+     * Passes every listener for a specified event to a function one at a time
      *
-     * @api public
+     * @param {String} type Event type name
+     * @param {Function} callback Function to pass each listener to
+     * @return {Object} The current EventEmitter instance to allow chaining
      */
+    EventEmitter.prototype.eachListener = function(type, callback) {
+      // Initialise variables
+      var i = null,
+        possibleListeners = null,
+        result = null;
 
-    EventEmitter.prototype.removeListener = function (name, fn) {
-      if (this.$events && this.$events[name]) {
-        var list = this.$events[name];
+      // Only loop if the type exists
+      if(this._events.hasOwnProperty(type)) {
+        possibleListeners = this._events[type];
 
-        if (isArray(list)) {
-          var pos = -1;
+        for(i = 0; i < possibleListeners.length; i += 1) {
+          result = callback.call(this, possibleListeners[i], i);
 
-          for (var i = 0, l = list.length; i < l; i++) {
-            if (list[i] === fn || (list[i].listener && list[i].listener === fn)) {
-              pos = i;
-              break;
-            }
+          if(result === false) {
+            i -= 1;
           }
-
-          if (pos < 0) {
-            return this;
+          else if(result === true) {
+            break;
           }
-
-          list.splice(pos, 1);
-
-          if (!list.length) {
-            delete this.$events[name];
-          }
-        } else if (list === fn || (list.listener && list.listener === fn)) {
-          delete this.$events[name];
         }
       }
 
+      // Return the instance to allow chaining
       return this;
     };
 
     /**
-     * Removes all listeners for an event.
+     * Adds an event listener for the specified event
      *
-     * @api public
+     * @param {String} type Event type name
+     * @param {Function} listener Function to be called when the event is fired
+     * @param {Object} scope Object that this should be set to when the listener is called
+     * @param {Boolean} once If true then the listener will be removed after the first call
+     * @return {Object} The current EventEmitter instance to allow chaining
      */
-
-    EventEmitter.prototype.removeAllListeners = function (name) {
-      if (name === undefined) {
-        this.$events = {};
-        return this;
+    EventEmitter.prototype.addListener = function(type, listener, scope, once) {
+      // Create the listener array if it does not exist yet
+      if(!this._events.hasOwnProperty(type)) {
+        this._events[type] = [];
       }
 
-      if (this.$events && this.$events[name]) {
-        this.$events[name] = null;
-      }
+      // Push the new event to the array
+      this._events[type].push(new Event(type, listener, scope, once, this));
 
-      return this;
-    };
+      // Emit the new listener event
+      this.emit('newListener', type, listener, scope, once);
 
-    /**
-     * Gets all listeners for a certain event.
-     *
-     * @api publci
-     */
-
-    EventEmitter.prototype.listeners = function (name) {
-      if (!this.$events) {
-        this.$events = {};
-      }
-
-      if (!this.$events[name]) {
-        this.$events[name] = [];
-      }
-
-      if (!isArray(this.$events[name])) {
-        this.$events[name] = [this.$events[name]];
-      }
-
-      return this.$events[name];
-    };
-
-    /**
-     * Emits an event.
-     *
-     * @api public
-     */
-
-    EventEmitter.prototype.emit = function (name) {
-      if (!this.$events) {
-        return false;
-      }
-
-      var handler = this.$events[name];
-
-      if (!handler) {
-        return false;
-      }
-
-      var args = [].slice.call(arguments, 1);
-
-      if ('function' === typeof handler) {
-        handler.apply(this, args);
-      } else if (isArray(handler)) {
-        var listeners = handler.slice();
-
-        for (var i = 0, l = listeners.length; i < l; i++) {
-          listeners[i].apply(this, args);
+      // Check if we have exceeded the maxListener count
+      // Ignore this check if the count is 0
+      // Also don't check if we have already fired a warning
+      if(this._maxListeners && !this._events[type].warned && this._events[type].length > this._maxListeners) {
+        // The max listener count has been exceeded!
+        // Warn via the console if it exists
+        if(typeof console !== 'undefined') {
+          console.warn('Possible EventEmitter memory leak detected. ' + this._events[type].length + ' listeners added. Use emitter.setMaxListeners() to increase limit.');
         }
-      } else {
-        return false;
+
+        // Set the flag so it doesn't fire again
+        this._events[type].warned = true;
       }
 
-      return true;
+      // Return the instance to allow chaining
+      return this;
     };
 
-    EventEmitter.prototype.trigger = EventEmitter.prototype.emit;
+    /**
+     * Alias of the addListener method
+     *
+     * @param {String} type Event type name
+     * @param {Function} listener Function to be called when the event is fired
+     * @param {Object} scope Object that this should be set to when the listener is called
+     * @param {Boolean} once If true then the listener will be removed after the first call
+     */
+    EventEmitter.prototype.on = EventEmitter.prototype.addListener;
 
+    /**
+     * Alias of the addListener method but will remove the event after the first use
+     *
+     * @param {String} type Event type name
+     * @param {Function} listener Function to be called when the event is fired
+     * @param {Object} scope Object that this should be set to when the listener is called
+     * @return {Object} The current EventEmitter instance to allow chaining
+     */
+    EventEmitter.prototype.once = function(type, listener, scope) {
+      return this.addListener(type, listener, scope, true);
+    };
+
+    /**
+     * Removes the a listener for the specified event
+     *
+     * @param {String} type Event type name the listener must have for the event to be removed
+     * @param {Function} listener Listener the event must have to be removed
+     * @param {Object} scope The scope the event must have to be removed
+     * @return {Object} The current EventEmitter instance to allow chaining
+     */
+    EventEmitter.prototype.removeListener = function(type, listener, scope) {
+      this.eachListener(type, function(currentListener, index) {
+        // If this is the listener remove it from the array
+        // We also compare the scope if it was passed
+        if(currentListener.listener === listener && (!scope || currentListener.scope === scope)) {
+          this._events[type].splice(index, 1);
+        }
+      });
+
+      // Remove the property if there are no more listeners
+      if(this._events[type] && this._events[type].length === 0) {
+        delete this._events[type];
+      }
+
+      // Return the instance to allow chaining
+      return this;
+    };
+
+    /**
+     * Alias of the removeListener method
+     *
+     * @param {String} type Event type name the listener must have for the event to be removed
+     * @param {Function} listener Listener the event must have to be removed
+     * @param {Object} scope The scope the event must have to be removed
+     * @return {Object} The current EventEmitter instance to allow chaining
+     */
+    EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
+
+    /**
+     * Removes all listeners for a specified event
+     * If no event type is passed it will remove every listener
+     *
+     * @param {String} type Event type name to remove all listeners from
+     * @return {Object} The current EventEmitter instance to allow chaining
+     */
+    EventEmitter.prototype.removeAllListeners = function(type) {
+      // Check for a type, if there is none remove all listeners
+      // If there is a type however, just remove the listeners for that type
+      if(type && this._events.hasOwnProperty(type)) {
+        delete this._events[type];
+      }
+      else if(!type) {
+        this._events = {};
+      }
+
+      // Return the instance to allow chaining
+      return this;
+    };
+
+    /**
+     * Retrieves the array of listeners for a specified event
+     *
+     * @param {String} type Event type name to return all listeners from
+     * @return {Array} Will return either an array of listeners or an empty array if there are none
+     */
+    EventEmitter.prototype.listeners = function(type) {
+      // Return the array of listeners or an empty array if it does not exist
+      if(this._events.hasOwnProperty(type)) {
+        // It does exist, loop over building the array
+        var listeners = [];
+
+        this.eachListener(type, function(evt) {
+          listeners.push(evt.listener);
+        });
+
+        return listeners;
+      }
+
+      return [];
+    };
+
+    /**
+     * Emits an event executing all appropriate listeners
+     * All values passed after the type will be passed as arguments to the listeners
+     *
+     * @param {String} type Event type name to run all listeners from
+     * @return {Object} The current EventEmitter instance to allow chaining
+     */
+    EventEmitter.prototype.emit = function(type) {
+      // Calculate the arguments
+      var args = [],
+        i = null;
+
+      for(i = 1; i < arguments.length; i += 1) {
+        args.push(arguments[i]);
+      }
+
+      this.eachListener(type, function(currentListener) {
+        return currentListener.fire(args);
+      });
+
+      // Return the instance to allow chaining
+      return this;
+    };
+
+    /**
+     * Sets the max listener count for the EventEmitter
+     * When the count of listeners for an event exceeds this limit a warning will be printed
+     * Set to 0 for no limit
+     *
+     * @param {Number} maxListeners The new max listener limit
+     * @return {Object} The current EventEmitter instance to allow chaining
+     */
+    EventEmitter.prototype.setMaxListeners = function(maxListeners) {
+      this._maxListeners = maxListeners;
+
+      // Return the instance to allow chaining
+      return this;
+    };
+
+    // Export the class
     return EventEmitter;
-  })();
+  }());
 
   function QuickBaseClient(opts){
     opts = $.extend({},defaults,opts);
@@ -208,7 +308,7 @@
     this._ticket = opts.ticket;
   }
 
-  QuickBaseClient.prototype = new EventEmitter;
+  QuickBaseClient.prototype = new EventEmitter();
   QuickBaseClient.prototype.constructor = QuickBaseClient;
 
   QuickBaseClient.version = "3.0.0";

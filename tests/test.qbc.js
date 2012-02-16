@@ -82,7 +82,7 @@ describe('QuickBaseClient', function(){
     it('should register and fire', function(done){
       var qbc = new QuickBaseClient();
       qbc.on('test1',done);
-      qbc.trigger('test1');
+      qbc.emit('test1');
     });
   });
   describe('Authentication',function(){
