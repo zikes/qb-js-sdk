@@ -136,7 +136,7 @@
       this._events[type].push(new Event(type, listener, scope, once, this));
 
       // Emit the new listener event
-      this.emit('newListener', type, listener, scope, once);
+      this.emit("newListener", type, listener, scope, once);
 
       // Check if we have exceeded the maxListener count
       // Ignore this check if the count is 0
@@ -144,8 +144,8 @@
       if(this._maxListeners && !this._events[type].warned && this._events[type].length > this._maxListeners) {
         // The max listener count has been exceeded!
         // Warn via the console if it exists
-        if(typeof console !== 'undefined') {
-          console.warn('Possible EventEmitter memory leak detected. ' + this._events[type].length + ' listeners added. Use emitter.setMaxListeners() to increase limit.');
+        if(typeof console !== "undefined") {
+          console.warn("Possible EventEmitter memory leak detected. " + this._events[type].length + " listeners added. Use emitter.setMaxListeners() to increase limit.");
         }
 
         // Set the flag so it doesn't fire again
@@ -305,7 +305,7 @@
 
     this._dbid = opts.dbid;
     this._apptoken = opts.apptoken;
-    this._realm = opts.realm.match(/^http/) ? opts.realm : 'https://'+opts.realm+'.quickbase.com';
+    this._realm = opts.realm.match(/^http/) ? opts.realm : "https://"+opts.realm+".quickbase.com";
     this._ticket = opts.ticket;
   }
 
@@ -428,26 +428,26 @@
   QuickBaseClient.processTable = function($table){
     var output = {};
 
-    output.name = $table.children('name').text();
-    output.desc = $table.children('desc').text();
-    output.id = $table.find('original > table_id').text();
+    output.name = $table.children("name").text();
+    output.desc = $table.children("desc").text();
+    output.id = $table.find("original > table_id").text();
 
-    output.created = QuickBaseClient.to_date($table.find('original > cre_date').text());
-    output.modified = QuickBaseClient.to_date($table.find('original > mod_date').text());
-    output.next_record = parseInt($table.find('original > next_record_id').text(),10);
-    output.next_field = parseInt($table.find('original > next_field_id').text(),10);
-    output.default_sort_fid = parseInt($table.find('original > def_sort_fid').text(),10);
-    output.default_sort_order = parseInt($table.find('original > def_sort_order').text(),10);
+    output.created = QuickBaseClient.to_date($table.find("original > cre_date").text());
+    output.modified = QuickBaseClient.to_date($table.find("original > mod_date").text());
+    output.next_record = parseInt($table.find("original > next_record_id").text(),10);
+    output.next_field = parseInt($table.find("original > next_field_id").text(),10);
+    output.default_sort_fid = parseInt($table.find("original > def_sort_fid").text(),10);
+    output.default_sort_order = parseInt($table.find("original > def_sort_order").text(),10);
 
     output.variables = {};
-    $table.find('variables var').each(function(){
-      var name = $(this).prop('name'),
+    $table.find("variables var").each(function(){
+      var name = $(this).prop("name"),
           value = $(this).text();
       if(value.match(/^\d+$/)){value = parseInt(value,10);}
       output.variables[name] = value;
     });
 
-    output.queries = QuickBaseClient.processQueries($table.find('queries query'));
+    output.queries = QuickBaseClient.processQueries($table.find("queries query"));
 
     return output;
   };
@@ -466,13 +466,13 @@
     var output = {};
     $queries.each(function(){
       var $query = $(this);
-      output[$query.prop('id')] = {
-        "name": $query.find('qyname').text(),
-        "type": $query.find('qytype').text(),
-        "desc": $query.find('qydesc').text(),
-        "sort_list": $query.find('qyslist').text(),
-        "options": $query.find('qyopts').text(),
-        "columns": $query.find('qycalst').text()
+      output[$query.prop("id")] = {
+        "name": $query.find("qyname").text(),
+        "type": $query.find("qytype").text(),
+        "desc": $query.find("qydesc").text(),
+        "sort_list": $query.find("qyslist").text(),
+        "options": $query.find("qyopts").text(),
+        "columns": $query.find("qycalst").text()
       };
     });
     return output;
@@ -556,7 +556,7 @@
         "action": "API_GetDBInfo",
         "processData": function($data){
           var output = {}, i, len,
-              tags=['dbname','lastRecModTime','lastModifiedTime','createdTime','numRecords','mgrID','mgrName','version','time_zone'];
+              tags=["dbname","lastRecModTime","lastModifiedTime","createdTime","numRecords","mgrID","mgrName","version","time_zone"];
           for(i=0,len=tags.length;i<len;i++){
             if($data.find(tags[i]).length){
               output[tags[i]] = $data.find(tags[i]).text();
@@ -582,7 +582,7 @@
       {
         "action": "API_FindDBByName",
         "processData": function($data){
-          return $data.find('dbid').text();
+          return $data.find("dbid").text();
         },
         "data":{
           "dbname": opts.dbname,
@@ -653,7 +653,7 @@
       {
         "action": "API_GetSchema",
         "processData": function($data){
-          return QuickBaseClient.processTable($data.find('table'));
+          return QuickBaseClient.processTable($data.find("table"));
         }
       },
       opts
@@ -668,16 +668,16 @@
         "action": "API_UserRoles",
         "processData": function($data){
           var output=[];
-          $data.find('users user').each(function(){
+          $data.find("users user").each(function(){
             var user = {roles:[]};
-            user.id = $(this).attr('id');
-            user.name = $(this).find('name').text();
-            $(this).find('role').each(function(){
+            user.id = $(this).attr("id");
+            user.name = $(this).find("name").text();
+            $(this).find("role").each(function(){
               var role = {};
-              role.id = $(this).attr('id');
-              role.name = $(this).children('name').text();
-              role.access = $(this).children('access').text();
-              role.access_id = $(this).children('access').attr('id');
+              role.id = $(this).attr("id");
+              role.name = $(this).children("name").text();
+              role.access = $(this).children("access").text();
+              role.access_id = $(this).children("access").attr("id");
               user.roles.push(role);
             });
             output.push(user);
@@ -702,9 +702,9 @@
         "action": "API_CreateDatabase",
         "processData": function($data){
           return {
-            "dbid": $data.find('dbid').text(),
-            "appdbid": $data.find('appdbid').text(),
-            "apptoken": $data.find('apptoken').text()
+            "dbid": $data.find("dbid").text(),
+            "appdbid": $data.find("appdbid").text(),
+            "apptoken": $data.find("apptoken").text()
           };
         },
         "data":{
@@ -729,9 +729,9 @@
   QuickBaseClient.prototype.clone_database = function(opts){
     // API_CloneDatabase
 
-    var keep_data = (typeof opts.keep_data==='boolean'?(opts.keep_data?"1":"0"):"1"),
-        exclude_files = (typeof opts.keep_files==='boolean'?(opts.keep_files?"0":"1"):"0"),
-        keep_users = (typeof opts.keep_users==='boolean'?(opts.keep_users?"1":"0"):"1");
+    var keep_data = (typeof opts.keep_data==="boolean"?(opts.keep_data?"1":"0"):"1"),
+        exclude_files = (typeof opts.keep_files==="boolean"?(opts.keep_files?"0":"1"):"0"),
+        keep_users = (typeof opts.keep_users==="boolean"?(opts.keep_users?"1":"0"):"1");
 
     return this.post($.extend(
       this.defaults(),
@@ -739,7 +739,7 @@
         "action": "API_CloneDatabase",
         "processData": function($data){
           return {
-            "dbid": $data.find('newdbid').text()
+            "dbid": $data.find("newdbid").text()
           };
         },
         "data":{
