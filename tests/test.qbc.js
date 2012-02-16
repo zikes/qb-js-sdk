@@ -300,8 +300,24 @@ describe('QuickBaseClient', function(){
       });
     });
     describe('#get_var()',function(){
-      it('should complete successfully');
-      it('should return appropriate results');
+      var promise;
+      it('should complete successfully',function(done){
+        promise = qbc.get_var({
+          dbid:app_dbid,
+          name:'Test_1'
+        }).done(function(){
+          done();
+        });
+      });
+      it('should return appropriate results',function(done){
+        promise.done(function(data){
+          if(data === '1'){
+            done();
+          }else{
+            done(new Error());
+          }
+        })
+      });
     });
     describe('#set_var()',function(){
       it('should complete successfully');

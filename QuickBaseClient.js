@@ -770,6 +770,19 @@
 
   QuickBaseClient.prototype.get_var = function(opts){
     // API_GetDBVar
+    return this.get($.extend(
+      this.defaults(),
+      {
+        "action": "API_GetDBVar",
+        "data": {
+          "varname": opts.var
+        },
+        "processData": function($data){
+          return $data.find("value").text();
+        }
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.set_var = function(opts){
