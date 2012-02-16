@@ -800,8 +800,37 @@
     ));
   };
 
-  QuickBaseClient.prototype.write_page = function(opts){
+  QuickBaseClient.prototype.add_page = function(opts){
+    if(!opts.name){opts.name="New Page";}
+    return this._write_page.call(this,opts);
+  };
+  QuickBaseClient.prototype.edit_page = function(opts){
+    return this._write_page.call(this,opts);
+  };
+
+  QuickBaseClient.prototype._write_page = function(opts){
     // API_AddReplaceDBPage
+    var data = {
+      "pagetype": opts.type || "1",
+      "pagebody": "<![CDATA[" + opts.body + "]]>" || ""
+    };
+
+    if(opts.id){data.pageid = opts.id;}
+    if(opts.name){data.pagename = opts.name;}
+
+    return this.post($.extend(
+      this.defaults(),
+      {
+        "action": "API_AddReplaceDBPage",
+        "data": data,
+        "processData": function($data){
+          return {
+            "id": $data.find("pageID").text() || null
+          };
+        }
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.get_page = function(opts){

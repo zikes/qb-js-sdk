@@ -333,15 +333,43 @@ describe('QuickBaseClient', function(){
               if(data === 'set'){
                 done();
               }else{
-                done(new Error())
+                done(new Error());
               }
             });
           });
       });
     });
-    describe('#write_page()',function(){
-      it('should complete successfully');
-      it('should return appropriate results');
+    describe('#add_page()',function(){
+      var promise;
+      it('should complete successfully',function(done){
+        promise = qbc.add_page({
+          dbid:app_dbid,
+          name:'add_test.htm',
+          body:'<!doctype html>\n<html>\n\t<head>\n\t\t<title>Test Page</title>\n\t</head>\n\t<body>\n\t\t<h1>Test Page</h1>\n\t</body>\n</html>'
+        }).done(function(){
+          done();
+        })
+      });
+      it('should return appropriate results',function(done){
+        promise.done(function(data){
+          if(data.id){
+            done();
+          }else{
+            done(new Error());
+          }
+        })
+      });
+    });
+    describe('#edit_page()',function(){
+      it('should complete successfully',function(done){
+        qbc.edit_page({
+          dbid:app_dbid,
+          id: 11,
+          body:'edited'
+        }).done(function(data){
+          done();
+        });
+      });
     });
     describe('#get_page()',function(){
       it('should complete successfully');
