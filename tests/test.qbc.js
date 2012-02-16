@@ -304,7 +304,7 @@ describe('QuickBaseClient', function(){
       it('should complete successfully',function(done){
         promise = qbc.get_var({
           dbid:app_dbid,
-          name:'Test_1'
+          name:'Test_Read'
         }).done(function(){
           done();
         });
