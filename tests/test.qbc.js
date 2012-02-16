@@ -277,8 +277,24 @@ describe('QuickBaseClient', function(){
       });
     });
     describe('#rename_database()',function(){
-      it('should complete successfully');
-      it('should return appropriate results');
+      it('should complete successfully',function(done){
+        qbc.rename_database({
+          dbid:app_dbid,
+          name:'Rename of Javascript SDK Testing Grounds'
+        }).done(function(){
+          qbc.schema({dbid:app_dbid}).done(function(data){
+            if(data.name==='Rename of Javascript SDK Testing Grounds'){
+              done();
+              qbc.rename_database({
+                dbid:app_dbid,
+                name:'Javascript SDK Testing Grounds'
+              });
+            }else{
+              done(new Error('rename_database failed to change application name'));
+            }
+          });
+        });
+      });
     });
     describe('#get_var()',function(){
       it('should complete successfully');

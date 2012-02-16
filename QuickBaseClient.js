@@ -756,6 +756,16 @@
 
   QuickBaseClient.prototype.rename_database = function(opts){
     // API_RenameApp
+    return this.post($.extend(
+      this.defaults(),
+      {
+        "action": "API_RenameApp",
+        "data": {
+          "newappname": opts.name
+        }
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.get_var = function(opts){
