@@ -365,7 +365,7 @@
             "message": $data.find("errtext").text()
           });
         }else{
-          deferred.resolve(opts.processData($data));
+          deferred.resolve(opts.process_data($data));
         }
     });
     promise.fail(function(data){
@@ -399,9 +399,9 @@
         });
       }else{
         if(opts.data_type === "raw"){
-          deferred.resolve(opts.processData(data));
+          deferred.resolve(opts.process_data(data));
         }else{
-          deferred.resolve(opts.processData($data));
+          deferred.resolve(opts.process_data($data));
         }
       }
     });
@@ -417,7 +417,7 @@
       "apptoken": this.apptoken(),
       "dbid": this.dbid(),
       "ticket": this.ticket(),
-      "processData": function(a){return a;},
+      "process_data": function(a){return a;},
       "data": {},
       "fields": {},
       "action": "",
@@ -429,7 +429,7 @@
   |                                 Utilities                                  |
   \****************************************************************************/
 
-  QuickBaseClient.processTable = function($table){
+  QuickBaseClient.process_table = function($table){
     var output = {};
 
     output.name = $table.children("name").text();
@@ -451,12 +451,12 @@
       output.variables[name] = value;
     });
 
-    output.queries = QuickBaseClient.processQueries($table.find("queries query"));
+    output.queries = QuickBaseClient.process_queries($table.find("queries query"));
 
     return output;
   };
 
-  QuickBaseClient.processFields = function($fields){
+  QuickBaseClient.process_fields = function($fields){
     var output = {};
 
     $fields.each(function(){
@@ -466,7 +466,7 @@
     return output;
   };
 
-  QuickBaseClient.processQueries = function($queries){
+  QuickBaseClient.process_queries = function($queries){
     var output = {};
     $queries.each(function(){
       var $query = $(this);
@@ -524,7 +524,7 @@
   QuickBaseClient.prototype.authenticate = function(opts){
     var self = this;
     return this.get($.extend(this.defaults(),{
-      "processData": function($data){
+      "process_data": function($data){
         var ticket = $data.find("ticket").text();
         self.ticket(ticket);
         return ticket;
@@ -543,7 +543,7 @@
     var self = this;
     return this.get($.extend(
       this.defaults(),
-      {"dbid": "main","action": "API_SignOut","processData": function(){self.ticket("");}},
+      {"dbid": "main","action": "API_SignOut","process_data": function(){self.ticket("");}},
       opts
     ));
   };
@@ -558,7 +558,7 @@
       this.defaults(),
       {
         "action": "API_GetDBInfo",
-        "processData": function($data){
+        "process_data": function($data){
           var output = {}, i, len,
               tags = ["dbname","lastRecModTime","lastModifiedTime","createdTime","numRecords","mgrID","mgrName","version","time_zone"];
           for(i = 0, len = tags.length; i < len; i++){
@@ -585,7 +585,7 @@
       this.defaults(),
       {
         "action": "API_FindDBByName",
-        "processData": function($data){
+        "process_data": function($data){
           return $data.find("dbid").text();
         },
         "data": {
@@ -603,7 +603,7 @@
       this.defaults(),
       {
         "action": "API_GetAncestorInfo",
-        "processData": function($data){
+        "process_data": function($data){
           return {
             "ancestor": $data.find("ancestorappid").text(),
             "oldest": $data.find("oldestancestorappid").text()
@@ -622,7 +622,7 @@
       {
         "action": "API_GetAppDTMInfo",
         "data": {"dbid": opts.dbid},
-        "processData": function($data){
+        "process_data": function($data){
           var output = {
             "req_time": new Date(parseInt($data.find("RequestTime").text(),10)),
             "next_req_time": new Date(parseInt($data.find("RequestNextAllowedTime").text(),10)),
@@ -656,8 +656,8 @@
       this.defaults(),
       {
         "action": "API_GetSchema",
-        "processData": function($data){
-          return QuickBaseClient.processTable($data.find("table"));
+        "process_data": function($data){
+          return QuickBaseClient.process_table($data.find("table"));
         }
       },
       opts
@@ -670,7 +670,7 @@
       this.defaults(),
       {
         "action": "API_UserRoles",
-        "processData": function($data){
+        "process_data": function($data){
           var output = [];
           $data.find("users user").each(function(){
             var user = {"roles": []};
@@ -704,7 +704,7 @@
       {
         "dbid": "main",
         "action": "API_CreateDatabase",
-        "processData": function($data){
+        "process_data": function($data){
           return {
             "dbid": $data.find("dbid").text(),
             "appdbid": $data.find("appdbid").text(),
@@ -741,7 +741,7 @@
       this.defaults(),
       {
         "action": "API_CloneDatabase",
-        "processData": function($data){
+        "process_data": function($data){
           return {
             "dbid": $data.find("newdbid").text()
           };
@@ -781,7 +781,7 @@
         "data": {
           "varname": opts.name
         },
-        "processData": function($data){
+        "process_data": function($data){
           return $data.find("value").text();
         }
       },
@@ -827,7 +827,7 @@
       {
         "action": "API_AddReplaceDBPage",
         "data": data,
-        "processData": function($data){
+        "process_data": function($data){
           return {
             "id": $data.find("pageID").text() || null
           };
@@ -868,7 +868,7 @@
     return this.post($.extend(this.defaults(),
       {
         "action": "API_AddField",
-        "processData": function($data){return $data.find("fid").text();},
+        "process_data": function($data){return $data.find("fid").text();},
         "data": {
           "label": opts.label || "New Field",
           "type": opts.type || "text",
@@ -909,7 +909,7 @@
     return this.post($.extend(this.defaults(),{
       "action": "API_AddRecord",
       "fields": opts.record,
-      "processData": function($data){
+      "process_data": function($data){
         var rid = parseInt($data.find("rid").text(),10);
         var updateId = parseInt($data.find("update_id").text(),10);
         return {"rid": rid,"updateId": updateId};
