@@ -372,7 +372,15 @@ describe('QuickBaseClient', function(){
       });
     });
     describe('#get_page()',function(){
-      it('should complete successfully');
+      it('should complete successfully',function(done){
+        qbc.get_page({
+          dbid:app_dbid,
+          id:12
+        }).done(function(data){
+          console.log(data);
+          done();
+        });
+      });
       it('should return appropriate results');
     });
     describe('#run_import()',function(){
