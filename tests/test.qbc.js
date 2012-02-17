@@ -2,6 +2,7 @@ describe('QuickBaseClient', function(){
   var apptoken="b35ijpduxr7rrbwge2ced3zwvke",
       app_dbid="bgwzttrag",
       table_dbid="bgwzttrbv",
+      table2_dbid="bgyf9wd72",
       username="Jason.Hutchinson@wal-mart.com",
       password="amSYyIaWW9Emrz0HF4Ed";
 
@@ -402,7 +403,16 @@ describe('QuickBaseClient', function(){
       });
     });
     describe('#import_csv()',function(){
-      it('should complete successfully');
+      var promise;
+      it('should complete successfully',function(done){
+        promise = qbc.import_csv({
+          dbid:table2_dbid,
+          csv:"Test2,2,01-02-1921,0,Jason.Hutchinson@wal-mart.com\nTest3,3,01-02-1922,1,Terry.Corp@wal-mart.com",
+          columns:"6.7.8.9.10"
+        }).done(function(){
+          done();
+        });
+      });
       it('should return appropriate results');
     });
   });

@@ -871,6 +871,20 @@
 
   QuickBaseClient.prototype.import_csv = function(opts){
     // API_ImportFromCSV
+    return this.post($.extend(
+      this.defaults(),
+      {
+        "action": "API_ImportFromCSV",
+        "data": {
+          "records_csv": "<![CDATA[" + opts.csv + "]]>",
+          "clist": opts.columns || opts.clist || "",
+          "clist_output": opts.output || "",
+          "skipfirst": !!opts.skip_first ? "1" : "0",
+          "msInUTC": !!opts.utc ? "1" : "0"
+        }
+      },
+      opts
+    ));
   };
 
   /****************************************************************************\
