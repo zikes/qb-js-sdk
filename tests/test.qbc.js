@@ -384,8 +384,22 @@ describe('QuickBaseClient', function(){
       it('should return appropriate results');
     });
     describe('#run_import()',function(){
-      it('should complete successfully');
-      it('should return appropriate results');
+      var promise;
+      it('should complete successfully',function(done){
+        promise = qbc.run_import({
+          dbid:app_dbid,
+          id:10
+        }).done(function(){done();});
+      });
+      it('should return appropriate results',function(done){
+        promise.done(function(message){
+          if(!!~message.indexOf('new records were created.')){
+            done();
+          }else{
+            done(new Error());
+          }
+        });
+      });
     });
     describe('#import_csv()',function(){
       it('should complete successfully');
