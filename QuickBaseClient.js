@@ -854,6 +854,19 @@
 
   QuickBaseClient.prototype.run_import = function(opts){
     // API_RunImport
+    return this.post($.extend(
+      this.defaults(),
+      {
+        "action": "API_RunImport",
+        "process_data": function($data){
+          return $data.find("import_status").text();
+        },
+        "data": {
+          "id": opts.id
+        }
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.import_csv = function(opts){
