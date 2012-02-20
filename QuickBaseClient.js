@@ -522,6 +522,7 @@
   \****************************************************************************/
 
   QuickBaseClient.prototype.authenticate = function(opts){
+    // API_Authenticate
     var self = this;
     return this.get($.extend(this.defaults(),{
       "process_data": function($data){
@@ -540,6 +541,7 @@
   };
 
   QuickBaseClient.prototype.signout = function(opts){
+    // API_SignOut
     var self = this;
     return this.get($.extend(
       this.defaults(),
@@ -892,6 +894,7 @@
   \****************************************************************************/
 
   QuickBaseClient.prototype.add_field = function(opts){
+    // API_AddField
     return this.post($.extend(this.defaults(),
       {
         "action": "API_AddField",
@@ -906,6 +909,7 @@
   };
 
   QuickBaseClient.prototype.delete_field = function(opts){
+    // API_DeleteField
     return this.post($.extend(
       this.defaults(),
       {
@@ -933,6 +937,7 @@
   \****************************************************************************/
 
   QuickBaseClient.prototype.add_record = function(opts){
+    // API_AddRecord
     return this.post($.extend(this.defaults(),{
       "action": "API_AddRecord",
       "fields": opts.record,
@@ -961,6 +966,7 @@
   };
 
   QuickBaseClient.prototype.delete_record = function(opts){
+    // API_DeleteRecord
     return this.post($.extend(this.defaults(),{
       "action": "API_DeleteRecord",
       "data": {"rid": opts.rid}
