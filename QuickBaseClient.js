@@ -953,6 +953,17 @@
 
   QuickBaseClient.prototype.field_remove_choices = function(opts){
     // API_FieldRemoveChoices
+    return this.post($.extend(
+      this.defaults(),
+      {
+        "action": "API_FieldRemoveChoices",
+        "data": {
+          "fid": opts.fid,
+          "choice": opts.choices
+        }
+      },
+      opts
+    ));
   };
 
   /****************************************************************************\
