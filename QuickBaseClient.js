@@ -922,6 +922,14 @@
 
   QuickBaseClient.prototype.set_key_field = function(opts){
     // API_SetKeyField
+    return this.post($.extend(
+      this.defaults(),
+      {
+        "action": "API_SetKeyField",
+        "data": {"fid": opts.fid}
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.field_add_choices = function(opts){
