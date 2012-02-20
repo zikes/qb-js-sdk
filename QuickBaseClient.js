@@ -336,6 +336,10 @@
       if(data.hasOwnProperty(prop)){
         if(typeof data[prop] === "string" || typeof data[prop] === "number"){
           xml.push(wrap(prop,data[prop]));
+        }else if($.isArray(data[prop])){
+          $.each(data[prop],function(idx,val){
+            xml.push(wrap(prop,val));
+          });
         }else{
           throw new Error("Unknown data type for [" + prop + "]: " + (typeof data[prop]));
         }
