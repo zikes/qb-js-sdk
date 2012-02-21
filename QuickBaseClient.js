@@ -1042,6 +1042,27 @@
 
   QuickBaseClient.prototype.copy_details = function(opts){
     // API_CopyMasterDetail
+    var data = {};
+
+    data.sourcerid = opts.from || opts.source;
+    data.destrid = opts.to || opts.dest || opts.destination;
+    data.recurse = typeof opts.recurse === 'undefined' ? '1' : (!!opts.recurse ? '1' : '0');
+    data.relfids = opts.relfids || 'all';
+
+    return this.post($.extend(
+      this.defaults(),
+      {
+        "action": "API_CopyMasterDetail",
+        "data": data,
+        "process_data": function($data){
+          return {
+            "rid": $data.find("parentrid").text(),
+            "num_created": $data.find("numcreated").text()
+          };
+        }
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.delete_record = function(opts){
