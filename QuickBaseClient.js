@@ -1023,6 +1023,7 @@
     data.sourcerid = opts.rid;
     data.copyfid = opts.name_field;
     data.recurse = typeof opts.recurse === 'undefined' ? '1' : (!!opts.recurse ? '1' : '0');
+    data.relfids = opts.relfids || 'all';
 
     return this.post($.extend(
       this.defaults(),
