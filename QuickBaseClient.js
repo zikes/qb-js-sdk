@@ -19,7 +19,7 @@
 */
 
 ;(function($, global, undefined){
-  /*jshint bitwise:false */
+  /*jshint bitwise:false, loopfunc:true */
   "use strict";
 
   var defaults = {
@@ -998,6 +998,21 @@
 
   QuickBaseClient.prototype.change_record_owner = function(opts){
     // API_ChangeRecordOwner
+    var data = {};
+
+    if(opts.rid){data.rid = opts.rid;}
+    if(opts.key){data.key = opts.key;}
+
+    data.newowner = opts.user;
+
+    return this.post($.extend(
+      this.defaults(),
+      {
+        "action": "API_ChangeRecordOwner",
+        "data": data
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.copy_master = function(opts){
