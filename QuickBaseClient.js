@@ -1017,6 +1017,27 @@
 
   QuickBaseClient.prototype.copy_master = function(opts){
     // API_CopyMasterDetail
+    var data = {};
+
+    data.destrid = 0;
+    data.sourcerid = opts.rid;
+    data.copyfid = opts.name_field;
+    data.recurse = typeof opts.recurse === 'undefined' ? '1' : (!!opts.recurse ? '1' : '0');
+
+    return this.post($.extend(
+      this.defaults(),
+      {
+        "action": "API_CopyMasterDetail",
+        "data": data,
+        "process_data": function($data){
+          return {
+            "rid": $data.find("parentrid").text(),
+            "num_created": $data.find("numcreated").text()
+          };
+        }
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.copy_details = function(opts){
