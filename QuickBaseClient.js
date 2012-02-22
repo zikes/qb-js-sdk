@@ -1076,6 +1076,26 @@
 
   QuickBaseClient.prototype.edit_record = function(opts){
     // API_EditRecord
+    var data = {};
+
+    if(opts.rid){data.rid = opts.rid;}
+    if(opts.key){data.key = opts.key;}
+
+    if(opts.update_id){data.update_id = opts.update_id;}
+
+    if(opts.ignore_errors){data.ignoreError = "1";}
+
+    data.msInUTC = !!opts.utc ? "1" : "0";
+
+    return this.post($.extend(
+      this.defaults(),
+      {
+        "action": "API_EditRecord",
+        "fields": opts.record,
+        "data": data
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.query = function(opts){
