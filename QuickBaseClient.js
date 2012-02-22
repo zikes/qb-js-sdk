@@ -1110,7 +1110,7 @@
         "action": "API_DoQueryCount",
         "process_data": function($data){
           return parseInt($data.find("numMatches").text(),10);
-        }
+        },
         "data": {
           "query": opts.query
         }
