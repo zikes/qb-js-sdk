@@ -1104,6 +1104,19 @@
 
   QuickBaseClient.prototype.query_count = function(opts){
     // API_DoQueryCount
+    return this.get($.extend(
+      this.defaults(),
+      {
+        "action": "API_DoQueryCount",
+        "process_data": function($data){
+          return parseInt($data.find("numMatches").text(),10);
+        }
+        "data": {
+          "query": opts.query
+        }
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.gen_results_table = function(opts){
