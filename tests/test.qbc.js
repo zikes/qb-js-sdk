@@ -417,10 +417,11 @@ describe('QuickBaseClient', function(){
     });
   });
   describe('Field Operations', function(){
-    var add_field_promise, del_field_promise, new_fid;
+    var add_field_promise, del_field_promise, new_fid, qbc;
+    beforeEach(function(){
+      qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
+    });
     describe('#add_field()', function(){
-      var qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
-
       it('should complete successfully', function(done){
         this.timeout(0);
         add_field_promise = qbc.add_field({
@@ -439,8 +440,6 @@ describe('QuickBaseClient', function(){
       it('should accept keys and rids');
     });
     describe('#delete_field()', function(){
-      var qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
-
       it('should complete successfully', function(done){
         this.timeout(0);
         add_field_promise.done(function(){
@@ -473,8 +472,19 @@ describe('QuickBaseClient', function(){
       it('should accept keys and rids');
     });
     describe('#set_key_field()',function(){
-      it('should complete successfully');
-      it('should return appropriate results');
+      it('should complete successfully',function(done){
+        qbc.set_key_field({
+          dbid: table2_dbid,
+          fid: 6
+        }).done(function(){
+          qbc.set_key_field({
+            dbid: table2_dbid,
+            fid: 3
+          }).done(function(){
+            done();
+          });
+        });
+      });
     });
     describe('#field_add_choices()',function(){
       it('should complete successfully');
