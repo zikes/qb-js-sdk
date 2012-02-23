@@ -1182,6 +1182,23 @@
 
   QuickBaseClient.prototype.record_as_html = function(opts){
     // API_GetRecordAsHTML
+    var data = {
+      rid: opts.rid
+    };
+
+    if(opts.jht || opts.jhtm || opts.jhtml){
+      data.jht = "1";
+    }
+
+    return this.get($.extend(
+      this.defaults(),
+      {
+        "action": "API_GetRecordAsHTML",
+        "data": data,
+        "data_type": "raw"
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.record_info = function(opts){
