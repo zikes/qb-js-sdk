@@ -1140,6 +1140,44 @@
 
   QuickBaseClient.prototype.gen_results_table = function(opts){
     // API_GenResultsTable
+    var data = {options:[]};
+
+    // Determine the query to run
+    if(opts.query){data.query = opts.query;}
+    if(opts.qid){data.qid = opts.qid;}
+    if(opts.qname){data.qname = opts.qname;}
+
+    // Columns and sorting
+    opts.clist = opts.columns || opts.clist || "";
+    opts.slist = opts.sort || opts.slist || "";
+
+    // Return format
+    if(opts.format.match(/^jhtm?l?/)){data.jht = "n";}
+    if(opts.format.match(/^jsa?/)){data.jsa = "1";}
+    if(opts.format === "csv"){data.options.push("csv");}
+    if(opts.format === "tsv"){data.options.push("tsv");}
+
+    // Misc. options
+    if(opts.max){data.options.push("num-"+opts.max);}
+    if(opts.only_new){data.options.push("onlynew");}
+    if(opts.skip){data.options.push("skp-"+opts.skip);}
+    if(opts.asc || opts.ascending){data.options.push("sortorder-A");}
+    if(opts.desc || opts.descending){data.options.push("sortorder-D");}
+    if(opts.no_edit){data.options.push("ned");}
+    if(opts.no_view){data.options.push("nvw");}
+    if(opts.no_changed){data.options.push("nfg");}
+    if(opts.plain_headers){data.options.push("phd");}
+    if(opts.abs || opts.absolute){data.options.push("abs");}
+
+    return this.get($.extend(
+      this.defaults(),
+      {
+        "action": "API_GenResultsTable",
+        "data": data,
+        "data_type": "raw"
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.record_as_html = function(opts){
