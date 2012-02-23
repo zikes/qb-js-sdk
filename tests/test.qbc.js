@@ -388,7 +388,7 @@ describe('QuickBaseClient', function(){
       var promise;
       it('should complete successfully',function(done){
         promise = qbc.run_import({
-          dbid:app_dbid,
+          dbid:table2_dbid,
           id:10
         }).done(function(){done();});
       });
@@ -483,6 +483,19 @@ describe('QuickBaseClient', function(){
           }).done(function(){
             done();
           });
+        });
+      });
+    });
+    describe('#set_field_properties()',function(){
+      it('should complete successfully',function(done){
+        qbc.set_field_properties({
+          dbid:table2_dbid,
+          fid: 6,
+          properties: {
+            "unique": false
+          }
+        }).done(function(){
+          done();
         });
       });
     });

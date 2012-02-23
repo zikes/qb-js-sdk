@@ -966,6 +966,25 @@
     ));
   };
 
+  QuickBaseClient.prototype.set_field_properties = function(opts){
+    // API_SetFieldProperties
+
+    for(var property in opts.properties) if(opts.properties.hasOwnProperty(property)){
+      if(typeof opts.properties[property] === "boolean"){
+        opts.properties[property] = opts.properties[property] ? "1" : "0";
+      }
+    }
+
+    return this.post($.extend(
+      this.defaults(),
+      {
+        "action": "API_SetFieldProperties",
+        "data": opts.properties
+      },
+      opts
+     ));
+  }
+
   /****************************************************************************\
   |                             Record Operations                              |
   \****************************************************************************/
