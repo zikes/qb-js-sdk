@@ -1207,6 +1207,39 @@
 
   QuickBaseClient.prototype.record_info = function(opts){
     // API_GetRecordInfo
+    var data = {};
+
+    if(opts.rid){data.rid = opts.rid;}
+    if(opts.key){data.key = opts.key;}
+
+    return this.get($.extend(
+      this.defaults(),
+      {
+        "action": "API_GetRecordInfo",
+        "data": data,
+        "process_data": function($data){
+          var output = {
+            "rid": parseInt($data.find("rid").text(),10),
+            "num_fields": parseInt($data.find("num_fields").text(),10),
+            "update_id": $data.find("update_id").text(),
+            "fields":{}
+          };
+          $data.find("field").each(function(){
+            var $field = $(this);
+            var field = {
+              "fid": parseInt($field.find("fid").text(),10),
+              "name": $field.find("name").text(),
+              "type": $field.find("type").text(),
+              "value": $field.find("value").text()
+            };
+            output.fields[field.fid] = field;
+            output.fields[field.name.replace(/\W/g,"_").toLowerCase()] = field;
+          });
+          return output;
+        }
+      },
+      opts
+    ));
   };
 
   /****************************************************************************\
