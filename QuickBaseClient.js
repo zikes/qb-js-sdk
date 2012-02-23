@@ -1190,6 +1190,10 @@
       data.jht = "1";
     }
 
+    if(opts.form_id){
+      data.dfid = opts.form_id;
+    }
+
     return this.get($.extend(
       this.defaults(),
       {
