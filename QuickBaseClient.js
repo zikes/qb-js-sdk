@@ -1262,6 +1262,22 @@
 
   QuickBaseClient.prototype.purge = function(opts){
     // API_PurgeRecords
+    var data = {};
+
+    if(opts.query){data.query = opts.query;}
+    if(opts.qid){data.qid = opts.qid;}
+    if(opts.qname){data.qname = opts.qname;}
+
+    return this.post($.extend(
+      this.defaults(),
+      {
+        "action": "API_PurgeRecords",
+        "process_data": function($data){
+          return parseInt($data.find("num_records_deleted").text(),10);
+        }
+      },
+      opts
+    ));
   };
 
   /****************************************************************************\
