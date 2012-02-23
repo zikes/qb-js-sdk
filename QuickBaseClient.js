@@ -1248,6 +1248,16 @@
 
   QuickBaseClient.prototype.num_records = function(opts){
     // API_GetNumRecords
+    return this.get($.extend(
+      this.defaults(),
+      {
+        "action": "API_GetNumRecords",
+        "process_data": function($data){
+          return parseInt($data.find("num_records").text(),10);
+        }
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.purge = function(opts){
