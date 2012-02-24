@@ -2,9 +2,12 @@ describe('QuickBaseClient', function(){
   var apptoken="b35ijpduxr7rrbwge2ced3zwvke",
       app_dbid="bgwzttrag",
       table_dbid="bgwzttrbv",
-      table2_dbid="bgyf9wd72",
-      username="Jason.Hutchinson@wal-mart.com",
-      password="amSYyIaWW9Emrz0HF4Ed";
+      table2_dbid="bgyf9wd72";
+
+  if(!config){
+    alert('config.js has not been included.');
+    return;
+  }
 
   describe('Static Properties', function(){
     it('should have a version', function(){
@@ -91,8 +94,8 @@ describe('QuickBaseClient', function(){
       var qbc = new QuickBaseClient({realm:'wmt'}),
           auth_promise = qbc
             .authenticate({
-              username:'Jason.Hutchinson@wal-mart.com',
-              password:'amSYyIaWW9Emrz0HF4Ed'
+              username:config.username,
+              password:config.password
             });
 
       it('should complete successfully', function(done){
@@ -116,8 +119,8 @@ describe('QuickBaseClient', function(){
       var qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken}),
           auth_promise = qbc
             .authenticate({
-              username:username,
-              password:password
+              username:config.username,
+              password:config.password
             }),
           ticket,
           signout_promise;
@@ -143,7 +146,7 @@ describe('QuickBaseClient', function(){
       });
       it('should be somewhat useless since the ticket still works', function(done){
         qbc
-          .authenticate({username:username,password:password})
+          .authenticate({username:config.username,password:config.password})
           .done(function(){
             done();
           });
