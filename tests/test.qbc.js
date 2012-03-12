@@ -397,7 +397,7 @@ describe('QuickBaseClient', function(){
       });
       it('should return appropriate results',function(done){
         promise.done(function(message){
-          if(!!~message.indexOf('new records were created.')){
+          if(!!~message.indexOf('new record') && !!~message.indexOf('created')){
             done();
           }else{
             done(new Error());
@@ -582,12 +582,16 @@ describe('QuickBaseClient', function(){
     });
   });
   describe('Table Operations',function(){
+    var qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
+
     describe('#num_records()',function(){
       it('should complete successfully');
       it('should return appropriate results');
     });
     describe('#purge()',function(){
-      it('should complete successfully');
+      it('should complete successfully',function(done){
+        qbc.purge({dbid: table2_dbid}).done(function(){done();});
+      });
       it('should return appropriate results');
     });
   });

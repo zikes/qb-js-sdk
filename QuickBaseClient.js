@@ -553,6 +553,7 @@
   QuickBaseClient.prototype.authenticate = function(opts){
     // API_Authenticate
     var self = this;
+
     return this.get($.extend(this.defaults(),{
       "process_data": function($data){
         var ticket = $data.find("ticket").text();
@@ -1004,7 +1005,7 @@
       this.defaults(),
       {
         "action": "API_SetFieldProperties",
-        "data": opts.properties
+        "data": $.extend({},{fid:opts.fid},opts.properties)
       },
       opts
      ));
