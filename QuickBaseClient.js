@@ -1445,6 +1445,18 @@
 
   QuickBaseClient.prototype.invite = function(opts){
     // API_SendInvitation
+
+    return this.post($.extend(
+      this.defaults(),
+      {
+        "action": "API_SendInvitation",
+        "data": {
+          "userid": opts.user || opts.userid || opts.user_id || opts.userId,
+          "usertext": opts.message || ""
+        }
+      },
+      opts
+    ));
   };
 
   if(global.QuickBaseClient){
