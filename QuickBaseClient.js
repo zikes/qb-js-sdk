@@ -1408,6 +1408,23 @@
 
   QuickBaseClient.prototype.provision_user = function(opts){
     // API_ProvisionUser
+
+    return this.post($.extend(
+      this.defaults(),
+      {
+        "action": "API_ProvisionUser",
+        "data": {
+          "email": opts.email,
+          "roleid": opts.role || opts.roleid || opts.role_id,
+          "fname": opts.first_name || opts.first || opts.firstname || opts.firstName,
+          "lname": opts.last_name || opts.last || opst.lastname || opts.lastName
+        },
+        "process_data": function($data){
+          return $data.find("userid").text()
+        }
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.remove_user = function(opts){
