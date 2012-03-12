@@ -500,10 +500,16 @@
         "id": $access.attr("id"),
         "name": $access.text()
       };
+      var $member = $(this).find("member");
+      var member = {
+        "type": $member.attr("type"),
+        "name": $member.text()
+      };
       output[id] = {
         "id": id,
         "name": name,
-        "access": access
+        "access": access,
+        "member": member
       };
     });
     return output;
@@ -1379,6 +1385,25 @@
 
   QuickBaseClient.prototype.user_role = function(opts){
     // API_GetUserRole
+
+    return this.get($.extend(
+      this.defaults(),
+      {
+        "action": "API_GetUserRole",
+        "data": {
+          "userid": opts.user || opts.userid || opts.user_id || "",
+          "inclgrps": typeof opts.groups === "boolean" ? (opts.groups ? "1" : "0") : "0"
+        },
+        "process_data": function($data){
+          return {
+            "id": $data.find("user").attr("id"),
+            "name": $data.find("user").children("name").text(),
+            "roles": QuickBaseClient.process_roles($data.find("roles"))
+          };
+        }
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.provision_user = function(opts){
