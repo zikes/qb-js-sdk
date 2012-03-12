@@ -490,6 +490,25 @@
     return new Date(parseInt(str,10));
   };
 
+  QuickBaseClient.process_roles = function($roles){
+    var output = {};
+    $roles.each(function(){
+      var id = $(this).attr("id");
+      var name = $(this).find("name").text();
+      var $access = $(this).find("access");
+      var access = {
+        "id": $access.attr("id"),
+        "name": $access.text()
+      };
+      output[id] = {
+        "id": id,
+        "name": name,
+        "access": access
+      };
+    });
+    return output;
+  }
+
   /****************************************************************************\
   |                               Configuration                                |
   \****************************************************************************/
@@ -1286,18 +1305,76 @@
 
   QuickBaseClient.prototype.add_user_to_role = function(opts){
     // API_AddUserToRole
+
+    return this.post($.extend(
+      this.defaults(),
+      {
+        "action": "API_AddUserToRole",
+        "data": {
+          "userid": opts.user || opts.userid || opts.user_id,
+          "roleid": opts.role || opts.roleid || opts.role_id
+        }
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.change_user_role = function(opts){
     // API_ChangeUserRole
+
+    return this.post($.extend(
+      this.defaults(),
+      {
+        "action": "API_ChangeUserRole",
+        "data": {
+          "userid": opts.user || opts.userid || opts.user_id,
+          "roleid": opts.role || opts.roleid || opts.role_id,
+          "newroleid": opts.new_role || opts.newroleid || opts.newrole || ""
+        }
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.role_info = function(opts){
     // API_GetRoleInfo
+
+    return this.get($.extend(
+      this.defaults(),
+      {
+        "action": "API_GetRoleInfo",
+        "process_data": function($data){
+          return QuickBaseClient.process_roles($data.find("roles"));
+        }
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.user_info = function(opts){
     // API_GetUserInfo
+
+    return this.get($.extend(
+      this.defaults(),
+      {
+        "action": "API_GetUserInfo",
+        "data": {
+          "email": opts.email || ""
+        },
+        "process_data": function($data){
+          var $user = $data.find("user");
+          return {
+            "id": $user.attr("id"),
+            "first_name": $user.find("firstName").text(),
+            "last_name": $user.find("lastName").text(),
+            "login": $user.find("login").text(),
+            "email": $user.find("email").text(),
+            "screen_name": $user.find("screenName").text()
+          };
+        }
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.user_role = function(opts){
