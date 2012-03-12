@@ -1429,6 +1429,18 @@
 
   QuickBaseClient.prototype.remove_user = function(opts){
     // API_RemoveUserFromRole
+
+    return this.post($.extend(
+      this.defaults(),
+      {
+        "action": "API_RemoveUserFromRole",
+        "data": {
+          "userid": opts.user || opts.userid || opts.user_id || opts.userId,
+          "roleid": opts.role || opts.roleid || opts.role_id || opts.roleId
+        }
+      },
+      opts
+    ));
   };
 
   QuickBaseClient.prototype.invite = function(opts){
