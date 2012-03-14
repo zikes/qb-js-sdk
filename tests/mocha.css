@@ -49,7 +49,7 @@ body {
 }
 
 #mocha .test.pass::before {
-  content: '✓';
+  content: '>';
   font-size: 12px;
   display: block;
   float: left;
@@ -62,7 +62,7 @@ body {
 }
 
 #mocha .test.pending::before {
-  content: '◦';
+  content: '-';
   color: #0b97c4;
 }
 
@@ -75,7 +75,7 @@ body {
 }
 
 #mocha .test.fail::before {
-  content: '✖';
+  content: 'x';
   font-size: 12px;
   display: block;
   float: left;
