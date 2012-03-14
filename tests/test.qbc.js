@@ -462,18 +462,25 @@ describe('QuickBaseClient', function(){
     });
     describe('#import_csv()',function(){
       var qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
-      var promise;
+      var promise = qbc.import_csv({
+        dbid:table2_dbid,
+        csv:"Test2,2,01-02-1921,0,Jason.Hutchinson@wal-mart.com\nTest3,3,01-02-1922,1,Terry.Corp@wal-mart.com",
+        columns:"6.7.8.9.10"
+      });
       it('should complete successfully',function(done){
-        promise = qbc.import_csv({
-          dbid:table2_dbid,
-          csv:"Test2,2,01-02-1921,0,Jason.Hutchinson@wal-mart.com\nTest3,3,01-02-1922,1,Terry.Corp@wal-mart.com",
-          columns:"6.7.8.9.10"
-        }).done(function(){
+        promise.done(function(){
           done();
         });
       });
       it('should return appropriate results',function(done){
-
+        promise.done(function(data){
+          expect(data).to.contain.keys(['added','input','rids','updated']);
+          expect(data.added).to.be.a('number');
+          expect(data.input).to.be.a('number');
+          expect(data.updated).to.be.a('number');
+          expect(data.rids).to.be.a('array');
+          done();
+        });
       });
     });
   });
@@ -498,7 +505,6 @@ describe('QuickBaseClient', function(){
           'type': 'InvalidType'
         }).fail(function(){done()}).done(function(){done(new Error())});
       });
-      it('should accept keys and rids');
     });
     describe('#delete_field()', function(){
       it('should complete successfully', function(done){
@@ -530,7 +536,6 @@ describe('QuickBaseClient', function(){
           'fid': 1
         }).done(function(){done(new Error())}).fail(function(){done()});
       });
-      it('should accept keys and rids');
     });
     describe('#set_key_field()',function(){
       it('should complete successfully',function(done){
