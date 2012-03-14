@@ -1075,11 +1075,21 @@
 
   QuickBaseClient.prototype.add_record_form = function(opts){
     // API_GenAddRecordForm
+    var data = {};
+
+    if(opts.defaults){
+      for(var fid in opts.defaults){
+        if(opts.defaults.hasOwnProperty(fid)){
+          data["_fid_"+fid] = opts.defaults[fid];
+        }
+      }
+    }
+
     return this.get($.extend(
       this.defaults(),
       {
         "action": "API_GenAddRecordForm",
-        "fields": opts.fields,
+        "data": data,
         "data_type": "raw"
       },
       opts
