@@ -662,14 +662,14 @@
             "tables": []
           };
           var $app = $data.find("app");
-          output.app.dbid = $app.prop("id");
-          output.app.last_modified = new Date(parseInt($app.find("lastModifiedTime"),10));
-          output.app.last_rec_modified = new Date(parseInt($app.find("lastRecModTime"),10));
+          output.app.dbid = $app.attr("id");
+          output.app.last_modified = new Date(parseInt($app.find("lastModifiedTime").text(),10));
+          output.app.last_rec_modified = new Date(parseInt($app.find("lastRecModTime").text(),10));
           $data.find("table").each(function(){
             output.tables.push({
-              "dbid": $(this).prop("id"),
-              "last_modified": new Date(parseInt($(this).find("lastModifiedTime"),10)),
-              "last_rec_modified": new Date(parseInt($(this).find("lastRecModTime"),10))
+              "dbid": $(this).attr("id"),
+              "last_modified": new Date(parseInt($(this).find("lastModifiedTime").text(),10)),
+              "last_rec_modified": new Date(parseInt($(this).find("lastRecModTime").text(),10))
             });
           });
           return output;
