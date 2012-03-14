@@ -1073,7 +1073,7 @@
     },opts));
   };
 
-  QuickBaseClient.prototype.form_add_record = function(opts){
+  QuickBaseClient.prototype.add_record_form = function(opts){
     // API_GenAddRecordForm
     return this.get($.extend(
       this.defaults(),
