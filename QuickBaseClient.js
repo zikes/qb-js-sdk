@@ -1008,6 +1008,9 @@
         "data": {
           "fid": opts.fid,
           "choice": opts.choices
+        },
+        "process_data": function($data){
+          return parseInt($data.find("numadded").text(),10);
         }
       },
       opts
