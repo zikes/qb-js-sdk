@@ -601,10 +601,10 @@ describe('QuickBaseClient', function(){
     });
   });
   describe('Record Operations', function(){
-    var deferred = $.Deferred(), promise = deferred.promise(), rid,
-        qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
+    var deferred = $.Deferred(), promise = deferred.promise(), rid;
 
     describe('#add_record()', function(){
+      var qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
       it('should complete successfully', function(done){
         qbc.add_record({
           'dbid': table_dbid,
@@ -619,12 +619,44 @@ describe('QuickBaseClient', function(){
       });
     });
     describe('#add_record_form()',function(){
-      it('should complete successfully');
-      it('should return appropriate results');
+      var qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
+      var arf_promise = qbc.add_record_form({
+        dbid: table2_dbid,
+        defaults:{
+          "6": "Test",
+          "7": 42
+        }
+      });
+      it('should complete successfully',function(done){
+        arf_promise.done(function(){done()});
+      });
+      it('should return appropriate results',function(done){
+        arf_promise.done(function(data){
+          expect(data.length).to.be.above(100);
+          expect(data).to.be.a('string');
+          expect(data).to.include('Test');
+          expect(data).to.include('42');
+          done();
+        })
+      });
     });
     describe('#change_record_owner()',function(){
-      it('should complete successfully');
-      it('should return appropriate results');
+      var qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
+      var cro_deferred = $.Deferred(), cro_promise=cro_deferred.promise();
+      promise.done(function(){
+        qbc.change_record_owner({
+          dbid: table_dbid,
+          rid: rid,
+          user: 'jrustad'
+        }).done(function(data){
+          cro_deferred.resolve(data);
+        });
+      });
+      it('should complete successfully',function(done){
+        cro_promise.done(function(){
+          done();
+        })
+      });
     });
     describe('#copy_master()',function(){
       it('should complete successfully');
@@ -635,6 +667,7 @@ describe('QuickBaseClient', function(){
       it('should return appropriate results');
     });
     describe('#delete_record()',function(){
+      var qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
       it('should complete successfully',function(done){
         promise.done(function(){
           qbc.delete_record({'dbid':table_dbid,'rid':rid}).done(function(){done()});
