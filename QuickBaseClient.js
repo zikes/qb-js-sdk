@@ -449,14 +449,22 @@
 
     output.variables = {};
     $table.find("variables var").each(function(){
-      var name = $(this).prop("name"),
+      var name = $(this).attr("name"),
           value = $(this).text();
       if(value.match(/^\d+$/)){value = parseInt(value,10);}
       output.variables[name] = value;
     });
 
-    output.queries = QuickBaseClient.process_queries($table.find("queries query"));
+    output.children = [];
+    $table.find("chdbids cbdbid").each(function(){
+      output.children.push({
+        name: $(this).attr("name"),
+        dbid: $(this).text()
+      });
+    });
 
+    output.queries = QuickBaseClient.process_queries($table.find("queries query"));
+    output.fields = QuickBaseClient.process_fields($table.find("fields field"));
     return output;
   };
 
@@ -464,7 +472,19 @@
     var output = {};
 
     $fields.each(function(){
-
+      var $field = $(this);
+      var id = $field.attr("id");
+      var field = {
+        id: id,
+        type: $field.attr("field_type"),
+        base_type: $field.attr("base_type"),
+      };
+      $field.children().each(function(){
+        var prop = this.nodeName.toLowerCase();
+        var val = $(this).text();
+        field[prop] = val;
+      })
+      output[id] = field;
     });
 
     return output;
@@ -474,7 +494,7 @@
     var output = {};
     $queries.each(function(){
       var $query = $(this);
-      output[$query.prop("id")] = {
+      output[$query.attr("id")] = {
         "name": $query.find("qyname").text(),
         "type": $query.find("qytype").text(),
         "desc": $query.find("qydesc").text(),
