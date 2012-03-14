@@ -57,6 +57,10 @@ module.exports = function(type){
 };
 }); // module: browser/debug.js
 
+require.register("browser/diff.js", function(module, exports, require){
+
+}); // module: browser/diff.js
+
 require.register("browser/events.js", function(module, exports, require){
 
 /**
@@ -513,6 +517,11 @@ module.exports = function(suite){
 
   suite.on('pre-require', function(context){
 
+    // noop variants
+
+    context.xdescribe = function(){};
+    context.xit = function(){};
+
     /**
      * Execute before running tests.
      */
@@ -849,7 +858,7 @@ require.register("mocha.js", function(module, exports, require){
  * Library version.
  */
 
-exports.version = '0.12.1';
+exports.version = '0.14.1';
 
 exports.utils = require('./utils');
 exports.interfaces = require('./interfaces');
@@ -869,7 +878,8 @@ require.register("reporters/base.js", function(module, exports, require){
  * Module dependencies.
  */
 
-var tty = require('browser/tty');
+var tty = require('browser/tty')
+  , diff = require('browser/diff');
 
 /**
  * Check if both stdio streams are associated with a tty.
@@ -910,6 +920,9 @@ exports.colors = {
   , 'slow': 31
   , 'green': 32
   , 'light': 90
+  , 'diff gutter': 90
+  , 'diff added': 42
+  , 'diff removed': 41
 };
 
 /**
@@ -997,7 +1010,41 @@ exports.list = function(failures){
       , message = err.message || ''
       , stack = err.stack || message
       , index = stack.indexOf(message) + message.length
-      , msg = stack.slice(0, index);
+      , msg = stack.slice(0, index)
+      , actual = err.actual
+      , expected = err.expected;
+
+    // actual / expected diff
+    if ('string' == typeof actual && 'string' == typeof expected) {
+      var len = Math.max(actual.length, expected.length);
+
+      if (len < 20) msg = errorDiff(err, 'Chars');
+      else msg = errorDiff(err, 'Words');
+
+      // linenos
+      var lines = msg.split('\n');
+      if (lines.length > 4) {
+        var width = String(lines.length).length;
+        msg = lines.map(function(str, i){
+          return pad(++i, width) + ' |' + ' ' + str;
+        }).join('\n');
+      }
+
+      // legend
+      msg = '\n'
+        + color('diff removed', 'actual')
+        + ' '
+        + color('diff added', 'expected')
+        + '\n\n'
+        + msg
+        + '\n';
+
+      // indent
+      msg = msg.replace(/^/gm, '      ');
+
+      fmt = color('error title', '  %s) %s:\n%s')
+        + color('error stack', '\n%s\n');
+    }
 
     // indent stack trace without msg
     stack = stack.slice(index + 1)
@@ -1100,6 +1147,51 @@ Base.prototype.epilogue = function(){
   console.log(fmt, stats.tests || 0, stats.duration);
   console.log();
 };
+
+/**
+ * Pad the given `str` to `len`.
+ *
+ * @param {String} str
+ * @param {String} len
+ * @return {String}
+ * @api private
+ */
+
+function pad(str, len) {
+  str = String(str);
+  return Array(len - str.length + 1).join(' ') + str;
+}
+
+/**
+ * Return a character diff for `err`.
+ *
+ * @param {Error} err
+ * @return {String}
+ * @api private
+ */
+
+function errorDiff(err, type) {
+  return diff['diff' + type](err.actual, err.expected).map(function(str){
+    if (str.added) return colorLines('diff added', str.value);
+    if (str.removed) return colorLines('diff removed', str.value);
+    return str.value;
+  }).join('');
+}
+
+/**
+ * Color lines for `str`, using the color `name`.
+ *
+ * @param {String} name
+ * @param {String} str
+ * @return {String}
+ * @api private
+ */
+
+function colorLines(name, str) {
+  return str.split('\n').map(function(str){
+    return color(name, str);
+  }).join('\n');
+}
 
 }); // module: reporters/base.js
 
@@ -1247,6 +1339,53 @@ Dot.prototype.constructor = Dot;
 
 }); // module: reporters/dot.js
 
+require.register("reporters/html-cov.js", function(module, exports, require){
+
+/**
+ * Module dependencies.
+ */
+
+var JSONCov = require('./json-cov')
+  , fs = require('browser/fs');
+
+/**
+ * Expose `HTMLCov`.
+ */
+
+exports = module.exports = HTMLCov;
+
+/**
+ * Initialize a new `JsCoverage` reporter.
+ *
+ * @param {Runner} runner
+ * @api public
+ */
+
+function HTMLCov(runner) {
+  var jade = require('jade')
+    , file = __dirname + '/templates/coverage.jade'
+    , str = fs.readFileSync(file, 'utf8')
+    , fn = jade.compile(str, { filename: file })
+    , self = this;
+
+  JSONCov.call(this, runner, false);
+
+  runner.on('end', function(){
+    process.stdout.write(fn({
+        cov: self.cov
+      , coverageClass: coverageClass
+    }));
+  });
+}
+
+function coverageClass(n) {
+  if (n >= 75) return 'high';
+  if (n >= 50) return 'medium';
+  if (n >= 25) return 'low';
+  return 'terrible';
+}
+}); // module: reporters/html-cov.js
+
 require.register("reporters/html.js", function(module, exports, require){
 
 /**
@@ -1285,15 +1424,17 @@ var statsTemplate = '<ul id="stats">'
 function HTML(runner) {
   Base.call(this, runner);
 
-  // TODO: clean up
-
   var self = this
     , stats = this.stats
     , total = runner.total
-    , root = $('#mocha')
+    , root = document.getElementById('mocha')
+    , stat = fragment(statsTemplate)
+    , items = stat.getElementsByTagName('li')
+    , passes = items[1].getElementsByTagName('em')[0]
+    , failures = items[2].getElementsByTagName('em')[0]
+    , duration = items[3].getElementsByTagName('em')[0]
+    , canvas = stat.getElementsByTagName('canvas')[0]
     , stack = [root]
-    , stat = $(statsTemplate).appendTo(root)
-    , canvas = stat.find('canvas').get(0)
     , progress
     , ctx
 
@@ -1302,7 +1443,9 @@ function HTML(runner) {
     progress = new Progress;
   }
 
-  if (!root.length) return error('#mocha div missing, add it to your document');
+  if (!root) return error('#mocha div missing, add it to your document');
+
+  root.appendChild(stat);
 
   if (progress) progress.size(40);
 
@@ -1310,12 +1453,12 @@ function HTML(runner) {
     if (suite.root) return;
 
     // suite
-    var el = $('<div class="suite"><h1>' + suite.title + '</h1></div>');
+    var el = fragment('<div class="suite"><h1>%s</h1></div>', suite.title);
 
     // container
-    stack[0].append(el);
-    stack.unshift($('<div>'));
-    el.append(stack[0]);
+    stack[0].appendChild(el);
+    stack.unshift(document.createElement('div'));
+    el.appendChild(stack[0]);
   });
 
   runner.on('suite end', function(suite){
@@ -1330,48 +1473,48 @@ function HTML(runner) {
   runner.on('test end', function(test){
     // TODO: add to stats
     var percent = stats.tests / total * 100 | 0;
-
-    if (progress) {
-      progress.update(percent).draw(ctx);
-    }
+    if (progress) progress.update(percent).draw(ctx);
 
     // update stats
     var ms = new Date - stats.start;
-    stat.find('.passes em').text(stats.passes);
-    stat.find('.failures em').text(stats.failures);
-    stat.find('.duration em').text((ms / 1000).toFixed(2));
+    text(passes, stats.passes);
+    text(failures, stats.failures);
+    text(duration, (ms / 1000).toFixed(2));
 
     // test
-    if (test.passed) {
-      var el = $('<div class="test pass"><h2>' + escape(test.title) + '</h2></div>')
+    if ('passed' == test.state) {
+      var el = fragment('<div class="test pass"><h2>%e</h2></div>', test.title);
     } else if (test.pending) {
-      var el = $('<div class="test pass pending"><h2>' + escape(test.title) + '</h2></div>')
+      var el = fragment('<div class="test pass pending"><h2>%e</h2></div>', test.title);
     } else {
-      var el = $('<div class="test fail"><h2>' + escape(test.title) + '</h2></div>');
+      var el = fragment('<div class="test fail"><h2>%e</h2></div>', test.title);
       var str = test.err.stack || test.err;
 
       // <=IE7 stringifies to [Object Error]. Since it can be overloaded, we
       // check for the result of the stringifying.
       if ('[object Error]' == str) str = test.err.message;
 
-      $('<pre class="error">' + escape(str) + '</pre>').appendTo(el);
+      el.appendChild(fragment('<pre class="error">%e</pre>', str));
     }
 
     // toggle code
-    el.find('h2').toggle(function(){
-      pre && pre.slideDown('fast');
-    }, function(){
-      pre && pre.slideUp('fast');
+    var h2 = el.getElementsByTagName('h2')[0];
+
+    on(h2, 'click', function(){
+      pre.style.display = 'none' == pre.style.display
+        ? 'block'
+        : 'none';
     });
 
     // code
     // TODO: defer
     if (!test.pending) {
-      var code = escape(clean(test.fn.toString()));
-      var pre = $('<pre><code>' + code + '</code></pre>');
-      pre.appendTo(el).hide();
+      var pre = fragment('<pre><code>%e</code></pre>', clean(test.fn.toString()));
+      el.appendChild(pre);
+      pre.style.display = 'none';
     }
-    stack[0].append(el);
+
+    stack[0].appendChild(el);
   });
 }
 
@@ -1380,7 +1523,50 @@ function HTML(runner) {
  */
 
 function error(msg) {
-  $('<div id="error">' + msg + '</div>').appendTo('body');
+  document.body.appendChild(fragment('<div id="error">%s</div>', msg));
+}
+
+/**
+ * Return a DOM fragment from `html`.
+ */
+
+function fragment(html) {
+  var args = arguments
+    , div = document.createElement('div')
+    , i = 1;
+
+  div.innerHTML = html.replace(/%([se])/g, function(_, type){
+    switch (type) {
+      case 's': return String(args[i++]);
+      case 'e': return escape(args[i++]);
+    }
+  });
+
+  return div.firstChild;
+}
+
+/**
+ * Set `el` text to `str`.
+ */
+
+function text(el, str) {
+  if (el.textContent) {
+    el.textContent = str;
+  } else {
+    el.innerText = str;
+  }
+}
+
+/**
+ * Listen on `event` with callback `fn`.
+ */
+
+function on(el, event, fn) {
+  if (el.addEventListener) {
+    el.addEventListener(event, fn, false);
+  } else {
+    el.attachEvent('on' + event, fn);
+  }
 }
 
 /**
@@ -1417,10 +1603,165 @@ exports.List = require('./list');
 exports.Spec = require('./spec');
 exports.Progress = require('./progress');
 exports.Landing = require('./landing');
+exports.JSONCov = require('./json-cov');
+exports.HTMLCov = require('./html-cov');
 exports.JSONStream = require('./json-stream');
 exports.XUnit = require('./xunit')
 
 }); // module: reporters/index.js
+
+require.register("reporters/json-cov.js", function(module, exports, require){
+
+/**
+ * Module dependencies.
+ */
+
+var Base = require('./base');
+
+/**
+ * Expose `JSONCov`.
+ */
+
+exports = module.exports = JSONCov;
+
+/**
+ * Initialize a new `JsCoverage` reporter.
+ *
+ * @param {Runner} runner
+ * @param {Boolean} output
+ * @api public
+ */
+
+function JSONCov(runner, output) {
+  var self = this
+    , output = 1 == arguments.length ? true : output;
+
+  Base.call(this, runner);
+
+  var tests = []
+    , failures = []
+    , passes = [];
+
+  runner.on('test end', function(test){
+    tests.push(test);
+  });
+
+  runner.on('pass', function(test){
+    passes.push(test);
+  });
+
+  runner.on('fail', function(test){
+    failures.push(test);
+  });
+
+  runner.on('end', function(){
+    var cov = global._$jscoverage || {};
+    var result = self.cov = map(cov);
+    result.stats = self.stats;
+    result.tests = tests.map(clean);
+    result.failures = failures.map(clean);
+    result.passes = passes.map(clean);
+    if (!output) return;
+    process.stdout.write(JSON.stringify(result, null, 2 ));
+  });
+}
+
+/**
+ * Map jscoverage data to a JSON structure
+ * suitable for reporting.
+ *
+ * @param {Object} cov
+ * @return {Object}
+ * @api private
+ */
+
+function map(cov) {
+  var ret = {
+      instrumentation: 'node-jscoverage'
+    , sloc: 0
+    , hits: 0
+    , misses: 0
+    , coverage: 0
+    , files: []
+  };
+
+  for (var filename in cov) {
+    var data = coverage(filename, cov[filename]);
+    ret.files.push(data);
+    ret.hits += data.hits;
+    ret.misses += data.misses;
+    ret.sloc += data.sloc;
+  }
+
+  if (ret.sloc > 0) {
+    ret.coverage = (ret.hits / ret.sloc) * 100;
+  }
+
+  return ret;
+};
+
+/**
+ * Map jscoverage data for a single source file
+ * to a JSON structure suitable for reporting.
+ *
+ * @param {String} filename name of the source file
+ * @param {Object} data jscoverage coverage data
+ * @return {Object}
+ * @api private
+ */
+
+function coverage(filename, data) {
+  var ret = {
+    filename: filename,
+    coverage: 0,
+    hits: 0,
+    misses: 0,
+    sloc: 0,
+    source: {}
+  };
+
+  data.source.forEach(function(line, num){
+    num++;
+
+    if (data[num] === 0) {
+      ret.misses++;
+      ret.sloc++;
+    } else if (data[num] !== undefined) {
+      ret.hits++;
+      ret.sloc++;
+    }
+
+    ret.source[num] = {
+        source: line
+      , coverage: data[num] === undefined
+        ? ''
+        : data[num]
+    };
+  });
+
+  ret.coverage = ret.hits / ret.sloc * 100;
+
+  return ret;
+}
+
+/**
+ * Return a plain-object representation of `test`
+ * free of cyclic properties etc.
+ *
+ * @param {Object} test
+ * @return {Object}
+ * @api private
+ */
+
+function clean(test) {
+  return {
+      title: test.title
+    , fullTitle: test.fullTitle()
+    , duration: test.duration
+  }
+}
+
+}); // module: reporters/json-cov.js
 
 require.register("reporters/json-stream.js", function(module, exports, require){
 
@@ -1537,7 +1878,7 @@ function JSONReporter(runner) {
       , passes: passes.map(clean)
     };
 
-    process.stdout.write(JSON.stringify(obj));
+    process.stdout.write(JSON.stringify(obj, null, 2));
   });
 }
 
@@ -1629,7 +1970,7 @@ function Landing(runner) {
       : crashed;
 
     // show the crash
-    if (test.failed) {
+    if ('failed' == test.state) {
       plane = color('plane crash', '✈');
       crashed = col;
     }
@@ -2109,7 +2450,7 @@ function test(test) {
     , time: test.duration / 1000
   };
 
-  if (test.failed) {
+  if ('failed' == test.state) {
     var err = test.err;
     attrs.message = escape(err.message);
     console.log(tag('testcase', attrs, false, tag('failure', attrs, false, cdata(err.stack))));
@@ -2436,7 +2777,7 @@ Runner.prototype.checkGlobals = function(test){
 
 Runner.prototype.fail = function(test, err){
   ++this.failures;
-  test.failed = true;
+  test.state = 'failed';
   this.emit('fail', test, err);
 };
 
@@ -2643,7 +2984,7 @@ Runner.prototype.runTests = function(suite, fn){
           return self.hookUp('afterEach', next);
         }
 
-        test.passed = true;
+        test.state = 'passed';
         self.emit('pass', test);
         self.emit('test end', test);
         self.hookUp('afterEach', next);
@@ -2700,7 +3041,7 @@ Runner.prototype.runSuite = function(suite, fn){
 Runner.prototype.uncaught = function(err){
   debug('uncaught exception');
   var runnable = this.currentRunnable;
-  if (runnable.failed) return;
+  if ('failed' == runnable.state) return;
   runnable.clearTimeout();
   err.uncaught = true;
   this.fail(runnable, err);
@@ -3179,9 +3520,9 @@ exports.keys = Object.keys || function(obj) {
   var keys = []
     , has = Object.prototype.hasOwnProperty // for `window` on <=IE8
 
-  for (var i in obj) {
-    if (has.call(obj, i)) {
-      keys.push(i);
+  for (var key in obj) {
+    if (has.call(obj, key)) {
+      keys.push(key);
     }
   }
 
@@ -3311,13 +3652,7 @@ window.mocha = require('mocha');
 ;(function(){
   var suite = new mocha.Suite('', new mocha.Context)
     , utils = mocha.utils
-    , Reporter = mocha.reporters.HTML
-
-  $(function(){
-    $('code').each(function(){
-      $(this).html(highlight($(this).text()));
-    });
-  });
+    , options = {}
 
   /**
    * Highlight the given string of `js`.
@@ -3328,11 +3663,22 @@ window.mocha = require('mocha');
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/\/\/(.*)/gm, '<span class="comment">//$1</span>')
-      .replace(/('.*')/gm, '<span class="string">$1</span>')
+      .replace(/('.*?')/gm, '<span class="string">$1</span>')
       .replace(/(\d+\.\d+)/gm, '<span class="number">$1</span>')
       .replace(/(\d+)/gm, '<span class="number">$1</span>')
       .replace(/\bnew *(\w+)/gm, '<span class="keyword">new</span> <span class="init">$1</span>')
       .replace(/\b(function|new|throw|return|var|if|else)\b/gm, '<span class="keyword">$1</span>')
+  }
+
+  /**
+   * Highlight code contents.
+   */
+
+  function highlightCode() {
+    var code = document.getElementsByTagName('code');
+    for (var i = 0, len = code.length; i < len; ++i) {
+      code[i].innerHTML = highlight(code[i].innerHTML);
+    }
   }
 
   /**
@@ -3351,12 +3697,16 @@ window.mocha = require('mocha');
   }
 
   /**
-   * Setup mocha with the give `ui` name.
+   * Setup mocha with the give setting options.
    */
 
-  mocha.setup = function(ui){
-    ui = mocha.interfaces[ui];
+  mocha.setup = function(opts){
+    if ('string' === typeof opts) options.ui = opts;
+    else options = opts;
+
+    ui = mocha.interfaces[options.ui];
     if (!ui) throw new Error('invalid mocha interface "' + ui + '"');
+    if (options.timeout) suite.timeout(options.timeout);
     ui(suite);
     suite.emit('pre-require', window);
   };
@@ -3368,14 +3718,13 @@ window.mocha = require('mocha');
   mocha.run = function(){
     suite.emit('run');
     var runner = new mocha.Runner(suite);
+    var Reporter = options.reporter || mocha.reporters.HTML;
     var reporter = new Reporter(runner);
     var query = parse(window.location.search || "");
     if (query.grep) runner.grep(new RegExp(query.grep));
-    runner.on('end', function(){
-      $('code').each(function(){
-        $(this).html(highlight($(this).text()));
-      });
-    });
+    if (options.ignoreLeaks) runner.ignoreLeaks = true;
+    if (options.globals) runner.globals(options.globals);
+    runner.on('end', highlightCode);
     return runner.run();
   };
 })();
