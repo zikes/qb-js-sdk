@@ -1026,6 +1026,9 @@
         "data": {
           "fid": opts.fid,
           "choice": opts.choices
+        },
+        "process_data": function($data){
+          return parseInt($data.find("numremoved").text(),10);
         }
       },
       opts
