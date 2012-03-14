@@ -189,7 +189,6 @@ describe('QuickBaseClient', function(){
       });
     });
     describe('#find()',function(){
-      var qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
       it('should complete successfully',function(done){
         qbc.find({'dbname':'Store Layout'}).done(function(){
           done();
@@ -204,31 +203,71 @@ describe('QuickBaseClient', function(){
     });
     describe('#ancestors()',function(){
       var qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
+      var promise = qbc.ancestors({dbid:app_dbid});
       it('should complete successfully',function(done){
-        qbc.ancestors({dbid:app_dbid}).done(function(){
+        promise.done(function(){
           done();
         });
       });
-      it('should return appropriate results');
+      it('should return appropriate results',function(done){
+        promise.done(function(info){
+          expect(info).to.have.keys(['ancestor','oldest']);
+          done();
+        });
+      });
     });
     describe('#dtm()',function(){
       var qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
+      var promise = qbc.dtm({dbid:app_dbid});
       it('should complete successfully',function(done){
-        qbc.dtm({dbid:app_dbid}).done(function(){
+        promise.done(function(){
           done();
         });
       });
-      it('should return appropriate results');
-    });
-    describe('#schema()',function(){
-      it('should complete successfully',function(done){
-        qbc.schema({dbid:app_dbid}).done(function(){done()});
+      it('should return appropriate results',function(done){
+        promise.done(function(info){
+          expect(info).to.contain.keys(['app','next_req_time','req_time','tables']);
+          expect(info.app).to.contain.keys(['dbid','last_modified','last_rec_modified']);
+          expect(info.tables).to.be.a('array');
+          done();
+        });
       });
-      it('should return appropriate results');
+    });
+    describe('#schema(app)',function(){
+      var qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
+      var promise = qbc.schema({dbid:app_dbid});
+      it('should complete successfully',function(done){
+        promise.done(function(){done()});
+      });
+      it('should return appropriate results',function(done){
+        promise.done(function(schema){
+          expect(schema).to.contain.keys([
+            'name','desc','id','created','modified','next_record','next_field',
+            'default_sort_fid','default_sort_order','variables','children'
+          ]);
+          done();
+        });
+      });
       it('should fail on nonexistent DBIDs',function(done){
         qbc.schema({dbid:'abc123'}).fail(function(data){
           done();
         })
+      });
+    });
+    describe('#schema(table)',function(){
+      var qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
+      var promise = qbc.schema({dbid:table_dbid});
+      it('should complete successfully',function(done){
+        promise.done(function(){done()});
+      });
+      it('should return appropriate results',function(done){
+        promise.done(function(schema){
+          expect(schema).to.contain.keys([
+            'name','desc','id','created','modified','next_record','next_field',
+            'default_sort_fid','default_sort_order','variables','children',
+            'queries','fields'
+          ]);
+        });
       });
     });
     describe('#users_roles()',function(){
