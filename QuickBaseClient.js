@@ -513,7 +513,7 @@
       };
     });
     return output;
-  }
+  };
 
   /****************************************************************************\
   |                               Configuration                                |
@@ -995,9 +995,11 @@
   QuickBaseClient.prototype.set_field_properties = function(opts){
     // API_SetFieldProperties
 
-    for(var property in opts.properties) if(opts.properties.hasOwnProperty(property)){
-      if(typeof opts.properties[property] === "boolean"){
-        opts.properties[property] = opts.properties[property] ? "1" : "0";
+    for(var property in opts.properties){
+      if(opts.properties.hasOwnProperty(property)){
+        if(typeof opts.properties[property] === "boolean"){
+          opts.properties[property] = opts.properties[property] ? "1" : "0";
+        }
       }
     }
 
@@ -1009,7 +1011,7 @@
       },
       opts
      ));
-  }
+  };
 
   /****************************************************************************\
   |                             Record Operations                              |
@@ -1418,10 +1420,10 @@
           "email": opts.email,
           "roleid": opts.role || opts.roleid || opts.role_id,
           "fname": opts.first_name || opts.first || opts.firstname || opts.firstName,
-          "lname": opts.last_name || opts.last || opst.lastname || opts.lastName
+          "lname": opts.last_name || opts.last || opts.lastname || opts.lastName
         },
         "process_data": function($data){
-          return $data.find("userid").text()
+          return $data.find("userid").text();
         }
       },
       opts
