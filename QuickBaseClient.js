@@ -933,6 +933,23 @@
           "clist_output": opts.output || "",
           "skipfirst": !!opts.skip_first ? "1" : "0",
           "msInUTC": !!opts.utc ? "1" : "0"
+        },
+        "process_data": function($data){
+          var output = {
+            "input": parseInt($data.find("num_recs_input").text(), 10)
+          };
+          var added = $data.find("num_recs_added").text();
+          var updated = $data.find("num_recs_updated").text();
+
+          output.added = added.length > 0 ? parseInt(added,10) : 0;
+          output.updated = updated.length > 0 ? parseInt(updated,10) : 0;
+
+          output.rids = [];
+          $data.find("rids rid").each(function(){
+            output.rids.push(parseInt($(this).text(),10));
+          });
+
+          return output;
         }
       },
       opts
