@@ -267,14 +267,23 @@ describe('QuickBaseClient', function(){
             'default_sort_fid','default_sort_order','variables','children',
             'queries','fields'
           ]);
+          done();
         });
       });
     });
     describe('#users_roles()',function(){
+      var qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
+      var promise = qbc.users_roles({dbid:app_dbid});
       it('should complete successfully',function(done){
-        qbc.users_roles({dbid:app_dbid}).done(function(){done()});
+        promise.done(function(){done()});
       });
-      it('should return appropriate results');
+      it('should return appropriate results',function(done){
+        promise.done(function(data){
+          expect(data[0]).to.contain.keys(['id','name','roles']);
+          expect(data[0].roles[0]).to.contain.keys(['access','access_id','id','name']);
+          done();
+        });
+      });
     });
   });
   describe('Application Operations',function(){
@@ -283,18 +292,24 @@ describe('QuickBaseClient', function(){
       qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
     });
     describe('#create_database()',function(){
-      it('should complete successfully',function(done){
-        new_app_promise = qbc.create_database({
+      var qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});;
+      new_app_promise = qbc.create_database({
           'name': 'Test Application',
           'desc': 'My Test Application'
-        }).done(function(data){
+      });
+      it('should complete successfully',function(done){
+        new_app_promise.done(function(){done();});
+      });
+      it('should return appropriate results',function(done){
+        new_app_promise.done(function(data){
+          expect(data).to.contain.keys(['dbid','appdbid','apptoken']);
           done();
         });
       });
-      it('should return appropriate results');
     });
     describe('#delete_database()',function(){
       it('should complete successfully',function(done){
+        this.timeout(0);
         new_app_promise.done(function(data){
           qbc.delete_database({dbid:data.appdbid,apptoken:data.apptoken}).done(function(){
             done();
@@ -415,16 +430,17 @@ describe('QuickBaseClient', function(){
       });
     });
     describe('#get_page()',function(){
+      var qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
+      var promise = qbc.get_page({dbid:app_dbid,id:12});
       it('should complete successfully',function(done){
-        qbc.get_page({
-          dbid:app_dbid,
-          id:12
-        }).done(function(data){
-          console.log(data);
+        promise.done(function(){done()});
+      });
+      it('should return appropriate results',function(done){
+        promise.done(function(data){
+          expect(data).to.have.string('</html>');
           done();
         });
       });
-      it('should return appropriate results');
     });
     describe('#run_import()',function(){
       var promise;
@@ -445,6 +461,7 @@ describe('QuickBaseClient', function(){
       });
     });
     describe('#import_csv()',function(){
+      var qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
       var promise;
       it('should complete successfully',function(done){
         promise = qbc.import_csv({
@@ -455,7 +472,9 @@ describe('QuickBaseClient', function(){
           done();
         });
       });
-      it('should return appropriate results');
+      it('should return appropriate results',function(done){
+
+      });
     });
   });
   describe('Field Operations', function(){
