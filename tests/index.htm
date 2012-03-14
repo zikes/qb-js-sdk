@@ -11,6 +11,7 @@
     <script src="https://wmt.quickbase.com/db/bgwzttrag?a=dbpage&pageID=6"></script>
     <script src="https://wmt.quickbase.com/db/bgwzttrag?a=dbpage&pageID=7"></script>
     <script>
+      mocha.setup({ignoreLeaks:true,ui:'bdd'});
       $(function () {
         mocha.run();
       })
