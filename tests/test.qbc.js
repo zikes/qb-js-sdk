@@ -566,12 +566,38 @@ describe('QuickBaseClient', function(){
       });
     });
     describe('#field_add_choices()',function(){
-      it('should complete successfully');
-      it('should return appropriate results');
+      var qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
+      var promise = qbc.field_add_choices({
+        dbid: table2_dbid,
+        fid: 11,
+        choices: ['New Choice 1','New Choice 2','New Choice 3']
+      });
+      it('should complete successfully',function(done){
+        promise.done(function(){done()});
+      });
+      it('should return appropriate results',function(done){
+        promise.done(function(data){
+          expect(data).to.be.a('number');
+          done();
+        })
+      });
     });
     describe('#field_remove_choices()',function(){
-      it('should complete successfully');
-      it('should return appropriate results');
+      var qbc = new QuickBaseClient({realm:'wmt',apptoken:apptoken});
+      var promise = qbc.field_remove_choices({
+        dbid: table2_dbid,
+        fid: 11,
+        choices: ['New Choice 1','New Choice 2','New Choice 3']
+      });
+      it('should complete successfully',function(done){
+        promise.done(function(){done()});
+      });
+      it('should return appropriate results',function(done){
+        promise.done(function(data){
+          expect(data).to.be.a('number');
+          done();
+        })
+      });
     });
   });
   describe('Record Operations', function(){
