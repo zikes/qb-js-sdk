@@ -727,7 +727,7 @@
           $data.find("users user").each(function(){
             var user = {"roles": []};
             user.id = $(this).attr("id");
-            user.name = $(this).find("name").text();
+            user.name = $(this).children("name").text();
             $(this).find("role").each(function(){
               var role = {};
               role.id = $(this).attr("id");
